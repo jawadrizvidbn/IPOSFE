@@ -18,21 +18,26 @@ const tabContentList = data => ({
 })
 
 const getData = async () => {
-  // Vars
-  const res = await fetch(`${process.env.API_URL}/pages/profile`)
+  try {
+    // Vars
+    const res = await fetch(`${process.env.API_URL}/pages/profile`)
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch profileData')
+    if (!res.ok) {
+      throw new Error('Failed to fetch profileData')
+    }
+
+    return res.json()
+  } catch (err) {
+    console.error('Error fetching profileData:', err)
+    return null
   }
-
-  return res.json()
 }
 
 const ProfilePage = async () => {
   // Vars
   const data = await getData()
 
-  return <UserProfile data={data} tabContentList={tabContentList(data)} />
+  return data ? <UserProfile data={data} tabContentList={tabContentList(data)} /> : <></>
 }
 
 export default ProfilePage

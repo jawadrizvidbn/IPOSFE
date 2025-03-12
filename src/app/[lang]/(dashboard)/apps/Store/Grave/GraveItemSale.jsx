@@ -1,5 +1,3 @@
-
-
 import UserList from '@views/apps/user/list'
 
 const getData = async () => {
@@ -21,4 +19,3 @@ const GraveItemSale = async () => {
 }
 
 export default GraveItemSale
-

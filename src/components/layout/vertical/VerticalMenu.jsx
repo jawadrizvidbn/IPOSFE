@@ -76,11 +76,24 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           <MenuItem href={`/${locale}/dashboards/analytics`}>{dictionary['navigation'].analytics}</MenuItem>
           <MenuItem href={`/${locale}/dashboards/ecommerce`}>{dictionary['navigation'].eCommerce}</MenuItem>
         </SubMenu>
-        <MenuSection label={dictionary['navigation'].appsPages}>
+
+        <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
+          <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
+          <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].register}</MenuItem>
+        </SubMenu>
+
+        <MenuItem href={`/${locale}/store`} icon={<i className='ri-table-alt-line' />}>
+          {dictionary['navigation'].store}
+        </MenuItem>
+        <MenuItem href={`/${locale}/MultipleStore`} icon={<i className='ri-table-alt-line' />}>
+          {dictionary['navigation'].AcrossStore}
+        </MenuItem>
+
+        {/* <MenuSection label={dictionary['navigation'].appsPages}>
           <MenuItem href={`/${locale}/apps/calendar`} icon={<i className='ri-calendar-line' />}>
             {dictionary['navigation'].calendar}
           </MenuItem>
-          {/* <SubMenu label={dictionary['navigation'].Store} icon={<i className='ri-file-list-2-line' />}>
+          <SubMenu label={dictionary['navigation'].Store} icon={<i className='ri-file-list-2-line' />}>
           <SubMenu label={dictionary['navigation'].Grave} icon={<i className='ri-file-list-2-line' />}>
             <MenuItem href={`/${locale}/apps/Store/Grave/GraveItemSale`}>{dictionary['navigation'].GraveItemSale}</MenuItem>
             <MenuItem href={`/${locale}/apps/Store/Grave/GraveItemFeb/${id || '4987'}`}>
@@ -117,7 +130,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
             <MenuItem href={`/${locale}/apps/Store/Victoria/VictoriaDailyApril`}>{dictionary['navigation'].VictoriaDailyApril}</MenuItem>
             <MenuItem href={`/${locale}/apps/Store/Victoria/VictoriaDailyMay`}>{dictionary['navigation'].VictoriaDailyMay}</MenuItem>
           </SubMenu>
-          </SubMenu> */}
+          </SubMenu>
           <SubMenu label={dictionary['navigation'].invoice} icon={<i className='ri-bill-line' />}>
             <MenuItem href={`/${locale}/apps/invoice/list`}>{dictionary['navigation'].list}</MenuItem>
             <MenuItem href={`/${locale}/apps/invoice/preview/${id || '4987'}`}>
@@ -126,10 +139,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
             <MenuItem href={`/${locale}/apps/invoice/edit/${id || '4987'}`}>{dictionary['navigation'].edit}</MenuItem>
             <MenuItem href={`/${locale}/apps/invoice/add`}>{dictionary['navigation'].add}</MenuItem>
           </SubMenu>
-          <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
-            <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
-            <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].register}</MenuItem>
-          </SubMenu>
+
           <SubMenu label={dictionary['navigation'].rolesPermissions} icon={<i className='ri-lock-2-line' />}>
             <MenuItem href={`/${locale}/apps/roles`}>{dictionary['navigation'].roles}</MenuItem>
             <MenuItem href={`/${locale}/apps/permissions`}>{dictionary['navigation'].permissions}</MenuItem>
@@ -232,8 +242,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           <MenuItem href={`/${locale}/icons-test`} icon={<i className='ri-remixicon-line' />}>
             Icons Test
           </MenuItem>
-        </MenuSection>
-        <MenuSection label={dictionary['navigation'].formsAndTables}>
+        </MenuSection> */}
+
+        {/* <MenuSection label={dictionary['navigation'].formsAndTables}>
           <MenuItem href={`/${locale}/forms/form-layouts`} icon={<i className='ri-layout-4-line' />}>
             {dictionary['navigation'].formLayouts}
           </MenuItem>
@@ -246,15 +257,10 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           <MenuItem href={`/${locale}/react-table`} icon={<i className='ri-table-alt-line' />}>
             {dictionary['navigation'].reactTable}
           </MenuItem>
-          {/* <MenuItem href={`/${locale}/react-table-rana`} icon={<i className='ri-table-alt-line' />}>
-            {dictionary['navigation'].store}
-          </MenuItem> */}
-          <MenuItem href={`/${locale}/store`} icon={<i className='ri-table-alt-line' />}>
+          <MenuItem href={`/${locale}/react-table-rana`} icon={<i className='ri-table-alt-line' />}>
             {dictionary['navigation'].store}
           </MenuItem>
-          <MenuItem href={`/${locale}/MultipleStore`} icon={<i className='ri-table-alt-line' />}>
-            {dictionary['navigation'].AcrossStore}
-          </MenuItem>
+
           <MenuItem
             href={`${process.env.NEXT_PUBLIC_DOCS_URL}/docs/user-interface/form-elements/intro`}
             suffix={<i className='ri-external-link-line text-xl' />}
@@ -271,8 +277,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           >
             {dictionary['navigation'].muiTables}
           </MenuItem>
-        </MenuSection>
-        <MenuSection label={dictionary['navigation'].chartsMisc}>
+        </MenuSection> */}
+
+        {/* <MenuSection label={dictionary['navigation'].chartsMisc}>
           <SubMenu label={dictionary['navigation'].charts} icon={<i className='ri-bar-chart-2-line' />}>
             <MenuItem href={`/${locale}/charts/recharts`}>{dictionary['navigation'].recharts}</MenuItem>
             <MenuItem href={`/${locale}/charts/apex-charts`}>{dictionary['navigation'].apex}</MenuItem>
@@ -337,7 +344,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
             </SubMenu>
             <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem>
           </SubMenu>
-        </MenuSection>
+        </MenuSection> */}
       </Menu>
       {/* <Menu
           popoutMenuOffset={{ mainAxis: 10 }}

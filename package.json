@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 154.0.173.220 -p 2025",
+    "dev:local": "next dev",
     "build": "next build",
     "start": "next start -H 154.0.173.220 -p 2025",
     "lint": "next lint",
@@ -98,6 +99,7 @@
     "schema": "./src/prisma/schema.prisma"
   },
   "devDependencies": {
+    "@types/react": "19.0.10",
     "next-router-mock": "^0.9.13"
   }
 }

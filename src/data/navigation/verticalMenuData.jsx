@@ -490,7 +490,7 @@ const verticalMenuData = (dictionary, params) => [
       //   icon: 'ri-table-alt-line',
       //   href: '/react-table-rana'
       // },
-        {
+      {
         label: dictionary['navigation'].store,
         icon: 'ri-table-alt-line',
         href: '/store'
