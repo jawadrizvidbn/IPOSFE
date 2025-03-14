@@ -9,7 +9,9 @@ module.exports = {
     "react/display-name": "off",
     "react/no-children-prop": "off",
     "@next/next/no-img-element": "off",
-    "@next/next/no-page-custom-font": "off",
+    "@next/next/no-page-custom-font": "off",    
+    'react/no-unescaped-entities': 'off',
+    
     "lines-around-comment": [
       "error",
       {
@@ -68,7 +70,7 @@ module.exports = {
         "next": "*"
       }
     ],
-    "newline-before-return": "error",
+    "newline-before-return": "off",
     "import/newline-after-import": [
       "error",
       {
