@@ -28,6 +28,9 @@ import { useSettings } from '@core/hooks/useSettings'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
+import { useDispatch } from 'react-redux'
+import { logout } from '@/redux/reducers/authSlice'
+import userService from '@/services/userService'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -52,6 +55,7 @@ const UserDropdown = () => {
   const { settings } = useSettings()
   const { lang: locale } = useParams()
 
+  const dispatch = useDispatch()
   const handleDropdownOpen = () => {
     !open ? setOpen(true) : setOpen(false)
   }
@@ -72,7 +76,9 @@ const UserDropdown = () => {
     try {
       // Sign out from the app
       await signOut({ redirect: false })
+      // await userService.logout()
 
+      dispatch(logout())
       // Redirect to login page
       router.push(getLocalizedUrl('/login', locale))
     } catch (error) {
