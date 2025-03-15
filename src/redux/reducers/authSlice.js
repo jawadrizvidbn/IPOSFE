@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { signIn } from 'next-auth/react'
 
-export const loginUser = createAsyncThunk('auth/loginUser', async (data, { rejectWithValue }) => {
+const name = 'auth'
+
+export const loginUser = createAsyncThunk(`${name}/loginUser`, async (data, { rejectWithValue }) => {
   try {
     const res = await signIn('credentials', {
       email: data.email,
@@ -21,7 +23,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (data, { rejec
 })
 
 const authSlice = createSlice({
-  name: 'auth',
+  name,
   initialState: {
     user: null,
     error: null,

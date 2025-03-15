@@ -79,7 +79,12 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
 
         <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
           <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
-          <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].register}</MenuItem>
+          <MenuItem href={`/${locale}/apps/user/create`}>{dictionary['navigation'].create}</MenuItem>
+        </SubMenu>
+
+        <SubMenu label={dictionary['navigation'].plans} icon={<i className='ri-user-line' />}>
+          <MenuItem href={`/${locale}/apps/plan/list`}>{dictionary['navigation'].list}</MenuItem>
+          <MenuItem href={`/${locale}/apps/plan/create`}>{dictionary['navigation'].create}</MenuItem>
         </SubMenu>
 
         <MenuItem href={`/${locale}/store`} icon={<i className='ri-table-alt-line' />}>
@@ -244,7 +249,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           </MenuItem>
         </MenuSection> */}
 
-        {/* <MenuSection label={dictionary['navigation'].formsAndTables}>
+        <MenuSection label={dictionary['navigation'].formsAndTables}>
           <MenuItem href={`/${locale}/forms/form-layouts`} icon={<i className='ri-layout-4-line' />}>
             {dictionary['navigation'].formLayouts}
           </MenuItem>
@@ -277,7 +282,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           >
             {dictionary['navigation'].muiTables}
           </MenuItem>
-        </MenuSection> */}
+        </MenuSection>
 
         {/* <MenuSection label={dictionary['navigation'].chartsMisc}>
           <SubMenu label={dictionary['navigation'].charts} icon={<i className='ri-bar-chart-2-line' />}>

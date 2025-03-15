@@ -34,6 +34,7 @@
         "loginV1": "تسجيل الدخول v1",
         "loginV2": "تسجيل الدخول الإصدار 2",
         "register": "يسجل",
+        "create": "يخلق",
         "registerV1": "تسجيل الإصدار 1",
         "registerV2": "تسجيل الإصدار 2",
         "registerMultiSteps": "تسجيل متعدد الخطوات",
@@ -80,6 +81,7 @@
         "menuLevels": "مستويات القائمة",
         "menuLevel2": "مستوى القائمة 2",
         "menuLevel3": "مستوى القائمة 3",
-        "disabledMenu": "قائمة المعوقين"
+        "disabledMenu": "قائمة المعوقين",
+        "plans": "الخطط"
     }
 }

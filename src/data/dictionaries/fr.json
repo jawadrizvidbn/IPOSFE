@@ -34,6 +34,7 @@
         "loginV1": "Connexion v1",
         "loginV2": "Connexion v2",
         "register": "S'inscrire",
+        "create": "Créer",
         "registerV1": "Enregistrer v1",
         "registerV2": "Enregistrer v2",
         "registerMultiSteps": "Enregistrer plusieurs étapes",
@@ -80,6 +81,7 @@
         "menuLevels": "Niveaux de menus",
         "menuLevel2": "Niveau menu 2",
         "menuLevel3": "Niveau menu 3",
-        "disabledMenu": "Menu désactivé"
+        "disabledMenu": "Menu désactivé",
+        "plans": "Forfaits"
     }
 }
