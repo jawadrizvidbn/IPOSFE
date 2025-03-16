@@ -56,7 +56,7 @@ const ListPlans = () => {
   // Fetch plans on component mount
   useEffect(() => {
     dispatch(getAllPlans())
-  }, [dispatch])
+  }, [])
 
   // Handle delete plan
   const handleDeleteClick = plan => {

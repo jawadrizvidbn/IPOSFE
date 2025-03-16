@@ -1,7 +1,8 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -12,6 +13,9 @@ import CardContent from '@mui/material/CardContent'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
+import MenuItem from '@mui/material/MenuItem'
+import CircularProgress from '@mui/material/CircularProgress'
+import { FormControl, InputLabel, Select } from '@mui/material'
 
 // Third-party Imports
 import axios from 'axios'
@@ -19,6 +23,14 @@ import { toast } from 'react-toastify'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { email, object, minLength, string } from 'valibot'
+
+// Redux Imports
+import {
+  connectNewServer,
+  unsetConnectedServerStores,
+  resetConnectNewServerStatus
+} from '@/redux/reducers/databaseSlice'
+import { thunkStatus } from '@/utils/statusHandler'
 
 const schema = object({
   name: string([minLength(1, 'This field is required'), minLength(3, 'Name must be at least 3 characters long')]),
@@ -35,18 +47,29 @@ const schema = object({
   plan: string([minLength(1, 'Plan is required')]),
   planActive: string(), // You might want to use a boolean value instead
   planStartDate: string(),
-  planEndDate: string()
+  planEndDate: string(),
+  serverHost: string(),
+  serverUser: string(),
+  serverPassword: string()
 })
 
 const CreateUser = () => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
 
+  // Redux
+  const dispatch = useDispatch()
+  const connectedServerStores = useSelector(state => state.database.connectedServerStores)
+
+  // For debugging only
+  const isConnecting = useSelector(state => state.database.connectNewServerStatus === thunkStatus.LOADING)
+
   // Hooks
   const {
     control,
     reset,
     handleSubmit,
+    getValues,
     formState: { errors }
   } = useForm({
     resolver: valibotResolver(schema),
@@ -62,11 +85,39 @@ const CreateUser = () => {
       plan: 'Basic', // Default value
       planActive: 'true', // String type, consider changing to boolean if needed
       planStartDate: '',
-      planEndDate: ''
+      planEndDate: '',
+      serverHost: '',
+      serverUser: '',
+      serverPassword: '',
+      selectedStores: []
     }
   })
 
+  useEffect(() => {
+    // Cleanup when component unmounts
+    return () => {
+      dispatch(unsetConnectedServerStores())
+    }
+  }, [])
+
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleConnectServer = async () => {
+    const { serverHost, serverUser, serverPassword } = getValues()
+
+    if (!serverHost || !serverUser || !serverPassword) {
+      toast.error('Please fill all server connection fields')
+      return
+    }
+
+    dispatch(
+      connectNewServer({
+        host: serverHost,
+        user: serverUser,
+        password: serverPassword
+      })
+    )
+  }
 
   const onSubmit = async data => {
     try {
@@ -95,6 +146,10 @@ const CreateUser = () => {
       console.error('Error adding user:', error)
     }
   }
+
+  // Determine if the stores dropdown should be disabled
+  const isStoresDisabled = !connectedServerStores || connectedServerStores.length === 0
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -195,6 +250,99 @@ const CreateUser = () => {
                         }}
                         InputLabelProps={{ shrink: true }}
                       />
+                    )}
+                  />
+                </Grid>
+
+                {/* Server Connection Fields */}
+                <Grid item xs={12}>
+                  <CardHeader title='Server Details' sx={{ px: 0, pt: 3, pb: 0 }} />
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name='serverHost'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Server Host'
+                        variant='outlined'
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name='serverUser'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Server User'
+                        variant='outlined'
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name='serverPassword'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Server Password'
+                        type='password'
+                        variant='outlined'
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    onClick={handleConnectServer}
+                    disabled={isConnecting}
+                    startIcon={isConnecting && <CircularProgress size={20} color='inherit' />}
+                  >
+                    {isConnecting ? 'Connecting...' : 'Connect to Server'}
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name='selectedStores'
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel id='stores-select-label'>Stores</InputLabel>
+                        <Select
+                          labelId='stores-select-label'
+                          fullWidth
+                          multiple
+                          label='Stores'
+                          disabled={isStoresDisabled}
+                          value={field.value}
+                          onChange={e => field.onChange(e.target.value)}
+                        >
+                          {connectedServerStores && connectedServerStores.length > 0 ? (
+                            connectedServerStores.map(store => (
+                              <MenuItem key={store} value={store}>
+                                {store}
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem disabled>No stores available</MenuItem>
+                          )}
+                        </Select>
+                      </FormControl>
                     )}
                   />
                 </Grid>

@@ -9,15 +9,20 @@ export const statusHandlerEnahncer = cs => (reducer, initialState, enhancer) => 
     let status
 
     //change newsState based on the sliceName, type and the status conveyed by the action
-    if (isPending(action)) status = 'loading'
-    else if (isFulfilled(action)) status = 'idle'
-    else if (isRejected(action) || isRejectedWithValue(action)) status = 'failed'
+    if (isPending(action)) {
+      status = 'loading'
+    } else if (isFulfilled(action)) {
+      status = 'idle'
+    } else if (isRejected(action) || isRejectedWithValue(action)) {
+      status = 'failed'
+    }
 
-    if (status)
+    if (status) {
       return {
         ...newState,
         [sliceName]: { ...newState[sliceName], [type + 'Status']: status }
       }
+    }
 
     return newState
   }
