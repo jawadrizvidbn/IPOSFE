@@ -9,6 +9,7 @@ import authReducer from './reducers/authSlice'
 import shopKeyReducer from './reducers/shopKeySlice'
 import stockOnHandReducer from './reducers/stockOnHandSlice'
 import planReducer from './reducers/planSlice'
+import permissionReducer from './reducers/permissionSlice'
 import databaseReducer from './reducers/databaseSlice'
 
 const persistConfig = {
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   shopKey: shopKeyReducer,
   stockOnHand: stockOnHandReducer,
   plan: planReducer,
+  permission: permissionReducer,
   database: databaseReducer
 })
 

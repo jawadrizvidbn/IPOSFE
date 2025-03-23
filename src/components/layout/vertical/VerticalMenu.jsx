@@ -87,6 +87,11 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           <MenuItem href={`/${locale}/apps/plan/create`}>{dictionary['navigation'].create}</MenuItem>
         </SubMenu>
 
+        <SubMenu label={dictionary['navigation'].permissions} icon={<i className='ri-user-line' />}>
+          <MenuItem href={`/${locale}/apps/permission/list`}>{dictionary['navigation'].list}</MenuItem>
+          <MenuItem href={`/${locale}/apps/permission/create`}>{dictionary['navigation'].create}</MenuItem>
+        </SubMenu>
+
         <MenuItem href={`/${locale}/store`} icon={<i className='ri-table-alt-line' />}>
           {dictionary['navigation'].store}
         </MenuItem>

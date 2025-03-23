@@ -22,7 +22,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { email, object, minLength, string } from 'valibot'
+import { email, object, minLength, string, number } from 'valibot'
 
 // Redux Imports
 import {
@@ -31,12 +31,11 @@ import {
   resetConnectNewServerStatus
 } from '@/redux/reducers/databaseSlice'
 import { thunkStatus } from '@/utils/statusHandler'
+import { getAllPlans } from '@/redux/reducers/planSlice'
 
 const schema = object({
   name: string([minLength(1, 'This field is required'), minLength(3, 'Name must be at least 3 characters long')]),
   email: string([minLength(1, 'This field is required'), email('Please enter a valid email address')]),
-  image: string([minLength(1, 'This field is required')]),
-
   // role: string([minLength(1, 'This field is required')]),
 
   // permissions: string([minLength(1, 'This field is required')]),
@@ -50,7 +49,8 @@ const schema = object({
   planEndDate: string(),
   serverHost: string(),
   serverUser: string(),
-  serverPassword: string()
+  serverPassword: string(),
+  gracePeriod: string()
 })
 
 const CreateUser = () => {
@@ -60,10 +60,11 @@ const CreateUser = () => {
   // Redux
   const dispatch = useDispatch()
   const connectedServerStores = useSelector(state => state.database.connectedServerStores)
+  const plans = useSelector(state => state.plan.list)
 
   // For debugging only
   const isConnecting = useSelector(state => state.database.connectNewServerStatus === thunkStatus.LOADING)
-
+  const getAllPlansLoading = useSelector(state => state.plan.getAllPlansStatus === thunkStatus.LOADING)
   // Hooks
   const {
     control,
@@ -76,10 +77,7 @@ const CreateUser = () => {
     defaultValues: {
       name: '',
       email: '',
-      image: '',
-
       // role: '',
-
       // permissions: '',
       password: '',
       plan: 'Basic', // Default value
@@ -89,11 +87,13 @@ const CreateUser = () => {
       serverHost: '',
       serverUser: '',
       serverPassword: '',
-      selectedStores: []
+      selectedStores: [],
+      gracePeriod: 0
     }
   })
 
   useEffect(() => {
+    dispatch(getAllPlans())
     // Cleanup when component unmounts
     return () => {
       dispatch(unsetConnectedServerStores())
@@ -193,26 +193,6 @@ const CreateUser = () => {
                         placeholder='johndoe@example.com'
                         error={!!errors.email}
                         helperText={errors.email ? errors.email.message : ''}
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    )}
-                  />
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='image'
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <TextField
-                        type='file'
-                        {...field}
-                        fullWidth
-                        label='Image'
-                        variant='outlined'
-                        error={!!errors.image}
-                        helperText={errors.image ? errors.image.message : ''}
                         InputLabelProps={{ shrink: true }}
                       />
                     )}
@@ -353,15 +333,27 @@ const CreateUser = () => {
                     control={control}
                     rules={{ required: true }}
                     render={({ field }) => (
-                      <TextField
-                        {...field}
-                        fullWidth
-                        label='Plan'
-                        variant='outlined'
-                        error={!!errors.plan}
-                        helperText={errors.plan ? errors.plan.message : ''}
-                        InputLabelProps={{ shrink: true }}
-                      />
+                      <FormControl fullWidth>
+                        <InputLabel id='plan-select-label'>Plan</InputLabel>
+                        <Select
+                          labelId='plan-select-label'
+                          fullWidth
+                          label='Plan'
+                          disabled={getAllPlansLoading}
+                          value={field.value}
+                          onChange={e => field.onChange(e.target.value)}
+                        >
+                          {plans && plans.length > 0 ? (
+                            plans.map(plan => (
+                              <MenuItem key={plan?.id} value={plan?.id}>
+                                {plan?.planName}
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem disabled>No plans available</MenuItem>
+                          )}
+                        </Select>
+                      </FormControl>
                     )}
                   />
                 </Grid>
@@ -398,6 +390,25 @@ const CreateUser = () => {
                         type='datetime-local'
                         error={!!errors.planEndDate}
                         helperText={errors.planEndDate ? errors.planEndDate.message : ''}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='gracePeriod'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Grace Period (in days)'
+                        variant='outlined'
+                        type='number'
+                        error={!!errors.gracePeriod}
+                        helperText={errors.gracePeriod ? errors.gracePeriod.message : ''}
                         InputLabelProps={{ shrink: true }}
                       />
                     )}
