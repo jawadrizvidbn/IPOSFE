@@ -164,10 +164,10 @@ const AllDataCashupSalesRecords = () => {
                             email: row.original.email,
                             role: row.original.role,
                             image: row.original.image,
-                            plan:row.original.plan,
-                            planActive:row.original.planActive,
-                            planStartDate:row.original.planStartDate,
-                            planEndDate:row.original.planEndDate,
+                            plan: row.original.plan,
+                            planActive: row.original.planActive,
+                            planStartDate: row.original.planStartDate,
+                            planEndDate: row.original.planEndDate
                             // eslint-disable-next-line lines-around-comment
                             // Add other fields you want to pass
                           })
