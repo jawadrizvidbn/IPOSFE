@@ -32,6 +32,7 @@ import {
 } from '@/redux/reducers/databaseSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 import { getAllPlans } from '@/redux/reducers/planSlice'
+import { getAllPermissions } from '@/redux/reducers/permissionSlice'
 
 const schema = object({
   name: string([minLength(1, 'This field is required'), minLength(3, 'Name must be at least 3 characters long')]),
@@ -61,6 +62,7 @@ const CreateUser = () => {
   const dispatch = useDispatch()
   const connectedServerStores = useSelector(state => state.database.connectedServerStores)
   const plans = useSelector(state => state.plan.list)
+  const permissions = useSelector(state => state.permission.list)
 
   // For debugging only
   const isConnecting = useSelector(state => state.database.connectNewServerStatus === thunkStatus.LOADING)
@@ -94,6 +96,8 @@ const CreateUser = () => {
 
   useEffect(() => {
     dispatch(getAllPlans())
+    dispatch(getAllPermissions())
+
     // Cleanup when component unmounts
     return () => {
       dispatch(unsetConnectedServerStores())
@@ -327,6 +331,9 @@ const CreateUser = () => {
                   />
                 </Grid>
 
+                <Grid item xs={12}>
+                  <CardHeader title='Plan Details' sx={{ px: 0, pt: 3, pb: 0 }} />
+                </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='plan'
@@ -411,6 +418,41 @@ const CreateUser = () => {
                         helperText={errors.gracePeriod ? errors.gracePeriod.message : ''}
                         InputLabelProps={{ shrink: true }}
                       />
+                    )}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CardHeader title='Permission Details Details' sx={{ px: 0, pt: 3, pb: 0 }} />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='permissions'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel id='permission-select-label'>Permission</InputLabel>
+                        <Select
+                          labelId='permission-select-label'
+                          fullWidth
+                          label='Permission'
+                          disabled={getAllPlansLoading}
+                          value={field.value}
+                          onChange={e => field.onChange(e.target.value)}
+                        >
+                          {permissions && permissions.length > 0 ? (
+                            permissions.map(permission => (
+                              <MenuItem key={permission?.id} value={permission?.id}>
+                                {permission?.name}
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem disabled>No plans available</MenuItem>
+                          )}
+                        </Select>
+                      </FormControl>
                     )}
                   />
                 </Grid>
