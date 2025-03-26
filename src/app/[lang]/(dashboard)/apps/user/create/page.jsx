@@ -22,7 +22,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { email, object, minLength, string, number } from 'valibot'
+import { email, object, minLength, string, number, array } from 'valibot'
 
 // Redux Imports
 import {
@@ -35,23 +35,18 @@ import { getAllPlans } from '@/redux/reducers/planSlice'
 import { getAllPermissions } from '@/redux/reducers/permissionSlice'
 
 const schema = object({
-  name: string([minLength(1, 'This field is required'), minLength(3, 'Name must be at least 3 characters long')]),
-  email: string([minLength(1, 'This field is required'), email('Please enter a valid email address')]),
-  // role: string([minLength(1, 'This field is required')]),
-
-  // permissions: string([minLength(1, 'This field is required')]),
-  password: string([
-    minLength(1, 'This field is required'),
-    minLength(8, 'Password must be at least 8 characters long')
-  ]),
-  plan: string([minLength(1, 'Plan is required')]),
-  planActive: string(), // You might want to use a boolean value instead
-  planStartDate: string(),
-  planEndDate: string(),
-  serverHost: string(),
-  serverUser: string(),
-  serverPassword: string(),
-  gracePeriod: string()
+  name: string([minLength(3, 'Name must be at least 3 characters long')]),
+  email: string([email('Please enter a valid email address')]),
+  permissions: string(),
+  password: string([minLength(8, 'Password must be at least 8 characters long')]),
+  plan: number([minLength(1, 'This field is required')]),
+  planStartDate: string([minLength(1, 'This field is required')]),
+  planEndDate: string([minLength(1, 'This field is required')]),
+  serverHost: string([minLength(1, 'This field is required')]),
+  serverUser: string([minLength(1, 'This field is required')]),
+  serverPassword: string([minLength(1, 'This field is required')]),
+  allowedStores: array(string()),
+  gracePeriod: string([minLength(1, 'This field is required')])
 })
 
 const CreateUser = () => {
@@ -79,17 +74,15 @@ const CreateUser = () => {
     defaultValues: {
       name: '',
       email: '',
-      // role: '',
-      // permissions: '',
+      permissions: '',
       password: '',
-      plan: 'Basic', // Default value
-      planActive: 'true', // String type, consider changing to boolean if needed
+      plan: null, // Default value
       planStartDate: '',
       planEndDate: '',
       serverHost: '',
       serverUser: '',
       serverPassword: '',
-      selectedStores: [],
+      allowedStores: [],
       gracePeriod: 0
     }
   })
@@ -125,25 +118,13 @@ const CreateUser = () => {
 
   const onSubmit = async data => {
     try {
-      // Fetch admin token from your state, context, or Redux store
-      const adminToken = 'tokan'
-
-      // Make API call to register user
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/register`
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${adminToken}`
-        }
-      }
-
-      const response = await axios.post(apiUrl, data, config)
+      console.log('Inside try block, data:', data)
 
       // Reset form after successful submission
-      reset()
+      // reset()
 
       // Display success message
-      toast.success('User added successfully')
+      // toast.success('User added successfully')
     } catch (error) {
       // Display error message
       toast.error('Failed to add user')
@@ -160,13 +141,28 @@ const CreateUser = () => {
         <Card>
           <CardHeader title='Add User' />
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form
+              onSubmit={e => {
+                console.log('Form submit event triggered')
+                console.log('Form validation errors:', errors)
+                console.log('Current form values:', getValues())
+                handleSubmit(
+                  data => {
+                    console.log('Form validated successfully, calling onSubmit with data:', data)
+                    onSubmit(data)
+                  },
+                  errors => {
+                    console.log('Form validation failed with errors:', errors)
+                  }
+                )(e)
+              }}
+            >
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='name'
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <TextField
                         {...field}
@@ -186,7 +182,7 @@ const CreateUser = () => {
                   <Controller
                     name='email'
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <TextField
                         {...field}
@@ -207,7 +203,7 @@ const CreateUser = () => {
                   <Controller
                     name='password'
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <TextField
                         {...field}
@@ -254,6 +250,8 @@ const CreateUser = () => {
                         label='Server Host'
                         variant='outlined'
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.serverHost}
+                        helperText={errors.serverHost?.message}
                       />
                     )}
                   />
@@ -269,6 +267,8 @@ const CreateUser = () => {
                         label='Server User'
                         variant='outlined'
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.serverUser}
+                        helperText={errors.serverUser?.message}
                       />
                     )}
                   />
@@ -285,6 +285,8 @@ const CreateUser = () => {
                         type='password'
                         variant='outlined'
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.serverPassword}
+                        helperText={errors.serverPassword?.message}
                       />
                     )}
                   />
@@ -302,7 +304,7 @@ const CreateUser = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <Controller
-                    name='selectedStores'
+                    name='allowedStores'
                     control={control}
                     render={({ field }) => (
                       <FormControl fullWidth>
@@ -315,6 +317,8 @@ const CreateUser = () => {
                           disabled={isStoresDisabled}
                           value={field.value}
                           onChange={e => field.onChange(e.target.value)}
+                          error={!!errors.allowedStores}
+                          helperText={errors.allowedStores?.message}
                         >
                           {connectedServerStores && connectedServerStores.length > 0 ? (
                             connectedServerStores.map(store => (
@@ -338,7 +342,7 @@ const CreateUser = () => {
                   <Controller
                     name='plan'
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <FormControl fullWidth>
                         <InputLabel id='plan-select-label'>Plan</InputLabel>
@@ -349,6 +353,8 @@ const CreateUser = () => {
                           disabled={getAllPlansLoading}
                           value={field.value}
                           onChange={e => field.onChange(e.target.value)}
+                          error={!!errors.plan}
+                          helperText={errors.plan?.message}
                         >
                           {plans && plans.length > 0 ? (
                             plans.map(plan => (
@@ -423,14 +429,14 @@ const CreateUser = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <CardHeader title='Permission Details Details' sx={{ px: 0, pt: 3, pb: 0 }} />
+                  <CardHeader title='Permission Details' sx={{ px: 0, pt: 3, pb: 0 }} />
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='permissions'
                     control={control}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <FormControl fullWidth>
                         <InputLabel id='permission-select-label'>Permission</InputLabel>
@@ -441,15 +447,17 @@ const CreateUser = () => {
                           disabled={getAllPlansLoading}
                           value={field.value}
                           onChange={e => field.onChange(e.target.value)}
+                          error={!!errors.permissions}
+                          helperText={errors.permissions?.message}
                         >
                           {permissions && permissions.length > 0 ? (
                             permissions.map(permission => (
-                              <MenuItem key={permission?.id} value={permission?.id}>
+                              <MenuItem key={permission?.id} value={permission?.name}>
                                 {permission?.name}
                               </MenuItem>
                             ))
                           ) : (
-                            <MenuItem disabled>No plans available</MenuItem>
+                            <MenuItem disabled>No permissions available</MenuItem>
                           )}
                         </Select>
                       </FormControl>
