@@ -33,11 +33,12 @@ import {
 import { thunkStatus } from '@/utils/statusHandler'
 import { getAllPlans } from '@/redux/reducers/planSlice'
 import { getAllPermissions } from '@/redux/reducers/permissionSlice'
+import { createUser } from '@/redux/reducers/authSlice'
 
 const schema = object({
   name: string([minLength(3, 'Name must be at least 3 characters long')]),
   email: string([email('Please enter a valid email address')]),
-  permissions: string(),
+  permissions: array(string()),
   password: string([minLength(8, 'Password must be at least 8 characters long')]),
   plan: number([minLength(1, 'This field is required')]),
   planStartDate: string([minLength(1, 'This field is required')]),
@@ -74,7 +75,7 @@ const CreateUser = () => {
     defaultValues: {
       name: '',
       email: '',
-      permissions: '',
+      permissions: [],
       password: '',
       plan: null, // Default value
       planStartDate: '',
@@ -120,6 +121,7 @@ const CreateUser = () => {
     try {
       console.log('Inside try block, data:', data)
 
+      dispatch(createUser(data))
       // Reset form after successful submission
       // reset()
 
@@ -443,6 +445,7 @@ const CreateUser = () => {
                         <Select
                           labelId='permission-select-label'
                           fullWidth
+                          multiple
                           label='Permission'
                           disabled={getAllPlansLoading}
                           value={field.value}

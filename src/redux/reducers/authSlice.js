@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import userService from '../../services/userService'
 import { signIn } from 'next-auth/react'
 import { thunkStatus } from '@/utils/statusHandler'
+import { toast } from 'react-toastify'
 
 const name = 'auth'
 
@@ -51,6 +52,11 @@ export const deleteUser = createAsyncThunk(`${name}/deleteUser`, async (id, { di
   toast.success('User deleted successfully')
 })
 
+export const getUserById = createAsyncThunk(`${name}/getUserById`, async (id, { dispatch }) => {
+  const response = await userService.getUserById(id)
+  return response.data
+})
+
 const authSlice = createSlice({
   name,
   initialState: {
@@ -61,7 +67,8 @@ const authSlice = createSlice({
     createUserStatus: thunkStatus.IDLE,
     getAllUsersStatus: thunkStatus.IDLE,
     updateUserStatus: thunkStatus.IDLE,
-    deleteUserStatus: thunkStatus.IDLE
+    deleteUserStatus: thunkStatus.IDLE,
+    getUserByIdStatus: thunkStatus.IDLE
   },
   reducers: {
     logout: state => {

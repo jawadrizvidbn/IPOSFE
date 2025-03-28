@@ -1,11 +1,27 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
-import { Card, CardHeader, Typography, TextField, Button, IconButton, TablePagination, Divider } from '@mui/material'
+import {
+  Card,
+  CardHeader,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  TablePagination,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress
+} from '@mui/material'
 import {
   useReactTable,
   createColumnHelper,
@@ -20,6 +36,10 @@ import classnames from 'classnames'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
+
+// Redux imports
+import { deleteUser } from '@/redux/reducers/authSlice'
+import { thunkStatus } from '@/utils/statusHandler'
 
 const columnHelper = createColumnHelper()
 
@@ -49,19 +69,50 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
   return <TextField {...props} value={value} onChange={e => setValue(e.target.value)} size='small' />
 }
 
-const AllDataCashupSalesRecords = ({ users = [] }) => {
+const AllUsers = ({ users = [] }) => {
+  const dispatch = useDispatch()
+  const isDeleting = useSelector(state => state.auth.deleteUserStatus === thunkStatus.LOADING)
+
   const [filteredData, setFilteredData] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10
   })
+
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState(null)
+
   const router = useRouter()
+  const { lang: locale } = useParams()
 
   // Initialize filtered data when users prop changes
   useEffect(() => {
     setFilteredData(users)
   }, [users])
+
+  // Delete handlers
+  const handleDeleteClick = user => {
+    setUserToDelete(user)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (userToDelete) {
+      dispatch(deleteUser(userToDelete.id))
+        .unwrap()
+        .then(() => {
+          setDeleteDialogOpen(false)
+          setUserToDelete(null)
+        })
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setUserToDelete(null)
+  }
 
   // Define columns
   const columns = useMemo(
@@ -92,23 +143,10 @@ const AllDataCashupSalesRecords = ({ users = [] }) => {
       columnHelper.accessor('action', {
         header: 'Actions',
         cell: ({ row }) => (
-          <div className='flex items-center gap-2'>
+          <div className='flex gap-2'>
             <Link
               href={{
-                pathname: '/en/apps/user/allusersupdate/',
-                query: {
-                  user: JSON.stringify({
-                    id: row.original.id,
-                    name: row.original.name,
-                    email: row.original.email,
-                    role: row.original.role,
-                    image: row.original.image,
-                    plan: row.original.plan,
-                    planActive: row.original.planActive,
-                    planStartDate: row.original.planStartDate,
-                    planEndDate: row.original.planEndDate
-                  })
-                }
+                pathname: `/${locale}/apps/user/edit/${row.original.id}`
               }}
               passHref
             >
@@ -116,31 +154,21 @@ const AllDataCashupSalesRecords = ({ users = [] }) => {
                 Edit
               </Button>
             </Link>
-            <Link
-              href={{
-                pathname: '/en/apps/user/user_permissions/',
-                query: {
-                  user: JSON.stringify({
-                    id: row.original.id,
-                    name: row.original.name,
-                    email: row.original.email,
-                    role: row.original.role,
-                    image: row.original.image
-                  })
-                }
-              }}
-              passHref
+            <Button
+              variant='outlined'
+              size='small'
+              color='error'
+              className='mr-2'
+              onClick={() => handleDeleteClick(row.original)}
             >
-              <Button variant='outlined' size='small' color='secondary'>
-                Permissions
-              </Button>
-            </Link>
+              Delete
+            </Button>
           </div>
         ),
         enableSorting: false
       })
     ],
-    []
+    [locale, handleDeleteClick]
   )
 
   // Initialize table
@@ -164,90 +192,121 @@ const AllDataCashupSalesRecords = ({ users = [] }) => {
   })
 
   return (
-    <Card>
-      <CardHeader title='All Users' />
-      <Divider />
-      <div className='flex justify-between p-5 gap-4 flex-col items-start sm:flex-row sm:items-center'>
-        <Button
-          color='secondary'
-          variant='outlined'
-          startIcon={<i className='ri-upload-2-line text-xl' />}
-          className='is-full sm:is-auto'
-        >
-          Export
-        </Button>
-        <DebouncedInput
-          value={globalFilter ?? ''}
-          onChange={value => setGlobalFilter(String(value))}
-          placeholder='Search Users'
-          className='is-full sm:is-auto'
+    <>
+      <Card>
+        <CardHeader title='All Users' />
+        <Divider />
+        <div className='flex justify-between p-5 gap-4 flex-col items-start sm:flex-row sm:items-center'>
+          <Button
+            color='secondary'
+            variant='outlined'
+            startIcon={<i className='ri-upload-2-line text-xl' />}
+            className='is-full sm:is-auto'
+          >
+            Export
+          </Button>
+          <DebouncedInput
+            value={globalFilter ?? ''}
+            onChange={value => setGlobalFilter(String(value))}
+            placeholder='Search Users'
+            className='is-full sm:is-auto'
+          />
+        </div>
+        <div className='overflow-x-auto'>
+          <table className={tableStyles.table}>
+            <thead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={classnames({
+                            'flex items-center': header.column.getIsSorted(),
+                            'cursor-pointer select-none': header.column.getCanSort()
+                          })}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {{
+                            asc: <i className='ri-arrow-up-s-line text-xl' />,
+                            desc: <i className='ri-arrow-down-s-line text-xl' />
+                          }[header.column.getIsSorted()] ?? null}
+                        </div>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            {table.getFilteredRowModel().rows.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    No data available
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody>
+                {table.getRowModel().rows.map(row => {
+                  return (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      ))}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            )}
+          </table>
+        </div>
+        <TablePagination
+          component='div'
+          count={table.getFilteredRowModel().rows.length}
+          page={table.getState().pagination.pageIndex}
+          rowsPerPage={table.getState().pagination.pageSize}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page)
+          }}
+          onRowsPerPageChange={e => {
+            table.setPageSize(Number(e.target.value))
+          }}
         />
-      </div>
-      <div className='overflow-x-auto'>
-        <table className={tableStyles.table}>
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={classnames({
-                          'flex items-center': header.column.getIsSorted(),
-                          'cursor-pointer select-none': header.column.getCanSort()
-                        })}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{
-                          asc: <i className='ri-arrow-up-s-line text-xl' />,
-                          desc: <i className='ri-arrow-down-s-line text-xl' />
-                        }[header.column.getIsSorted()] ?? null}
-                      </div>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          {table.getFilteredRowModel().rows.length === 0 ? (
-            <tbody>
-              <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  No data available
-                </td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {table.getRowModel().rows.map(row => {
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map(cell => (
-                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                    ))}
-                  </tr>
-                )
-              })}
-            </tbody>
-          )}
-        </table>
-      </div>
-      <TablePagination
-        component='div'
-        count={table.getFilteredRowModel().rows.length}
-        page={table.getState().pagination.pageIndex}
-        rowsPerPage={table.getState().pagination.pageSize}
-        rowsPerPageOptions={[10, 25, 50, 100]}
-        onPageChange={(_, page) => {
-          table.setPageIndex(page)
-        }}
-        onRowsPerPageChange={e => {
-          table.setPageSize(Number(e.target.value))
-        }}
-      />
-    </Card>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby='delete-dialog-title'
+        aria-describedby='delete-dialog-description'
+      >
+        <DialogTitle id='delete-dialog-title'>Delete User</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='delete-dialog-description'>
+            Are you sure you want to delete the user "{userToDelete?.name}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color='primary'>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color='error'
+            variant='contained'
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} color='inherit' /> : null}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   )
 }
 
-export default AllDataCashupSalesRecords
+export default AllUsers

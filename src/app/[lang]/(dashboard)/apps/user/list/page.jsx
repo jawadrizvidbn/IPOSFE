@@ -13,24 +13,25 @@ import Box from '@mui/material/Box'
 // Redux Imports
 import { useDispatch, useSelector } from 'react-redux'
 import { getAllUsers } from '@/redux/reducers/authSlice'
+import { thunkStatus } from '@/utils/statusHandler'
 
 // Component imports
 import AllUsers from '@/views/store/Allusers'
 
-const Tables = () => {
+const UserList = () => {
   const dispatch = useDispatch()
-  const { list: users, getAllUsersStatus } = useSelector(state => state.auth)
-  
+  const { list: users, getAllUsersStatus, deleteUserStatus } = useSelector(state => state.auth)
+
   useEffect(() => {
     dispatch(getAllUsers())
   }, [dispatch])
-  
-  const isLoading = getAllUsersStatus === 'loading'
+
+  const isLoading = getAllUsersStatus === thunkStatus.LOADING
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant='h5' gutterBottom>
           User Management
         </Typography>
       </Grid>
@@ -47,4 +48,4 @@ const Tables = () => {
   )
 }
 
-export default Tables
+export default UserList
