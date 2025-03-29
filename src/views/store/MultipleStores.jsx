@@ -22,7 +22,7 @@ const MultipleStores = () => {
   // Fetch shops based on user session
   const fetchShops = useCallback(async () => {
     if (!session) return // Ensure session is defined before fetching
-    const token = session.user.id
+    const token = session.user.token
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/getallshop`, {
@@ -72,7 +72,7 @@ const MultipleStores = () => {
   // Function to handle activation of selected shops
   const activateSelectedShops = async () => {
     if (!session || selectedShops.length === 0) return
-    const token = session.user.id
+    const token = session.user.token
 
     // Create a comma-separated list of selected shop keys
     const baseNames = selectedShops.join(',')
@@ -135,7 +135,9 @@ const MultipleStores = () => {
               <button
                 key={index}
                 onClick={() => handleShopClick(shopKey)}
-                className={`w-full h-14 text-xl ${isSelected ? 'bg-orange-600 text-white' : 'text-orange-600 border border-orange-600'} py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg`}
+                className={`w-full h-14 text-xl ${
+                  isSelected ? 'bg-orange-600 text-white' : 'text-orange-600 border border-orange-600'
+                } py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg`}
               >
                 {formattedShopKey}
               </button>

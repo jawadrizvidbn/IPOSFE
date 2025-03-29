@@ -68,19 +68,19 @@ const SixWeeks_Report = () => {
   const [selectedSub2No, setSelectedSub2No] = useState('')
   const [hiddenProducts, setHiddenProducts] = useState(false)
   const [txtCreditorName, setTxtCreditorName] = useState('') // State to store the selected CreditorName
-  const [weekStartDate,setWeekStart]=useState("")
-  const [weekEndDate,setWeekEndDate]=useState("")
+  const [weekStartDate, setWeekStart] = useState('')
+  const [weekEndDate, setWeekEndDate] = useState('')
   // eslint-disable-next-line padding-line-between-statements
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
 
@@ -102,7 +102,7 @@ const SixWeeks_Report = () => {
   useEffect(() => {
     const fetchDepartmentsAndCategories = async () => {
       try {
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories`
 
@@ -120,7 +120,7 @@ const SixWeeks_Report = () => {
   useEffect(() => {
     const fetchCreditoritemsGrouping = async () => {
       try {
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CreditoritemsGrouping`
 
@@ -167,13 +167,13 @@ const SixWeeks_Report = () => {
 
   const handleSubmit = async () => {
     try {
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+      const token = `Bearer ${session.user.token}` // Ensure this is the correct token
       const config = { headers: { Authorization: token } }
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/SixWeekReport`
 
@@ -576,14 +576,14 @@ const SixWeeks_Report = () => {
       // Optionally show a user-friendly error message or notification
     }
   }
-// eslint-disable-next-line lines-around-comment
-// Format the date to 'day-month-year' (dd-mm-yyyy)
-// eslint-disable-next-line padding-line-between-statements
-const formatDate = (date) => {
-  const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+  // eslint-disable-next-line lines-around-comment
+  // Format the date to 'day-month-year' (dd-mm-yyyy)
   // eslint-disable-next-line padding-line-between-statements
-  return new Date(date).toLocaleDateString('en-GB', options).replace(/\//g, '-');
-};
+  const formatDate = date => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' }
+    // eslint-disable-next-line padding-line-between-statements
+    return new Date(date).toLocaleDateString('en-GB', options).replace(/\//g, '-')
+  }
 
   return (
     <Card ref={containerRef} id='main'>
@@ -890,24 +890,24 @@ const formatDate = (date) => {
 
       <div id='tableContainer' className='sm:text-sm md:text-base lg:text-lg xl:text-xl' ref={containerRef}>
         <div className=''>
-        <div className="flex justify-between items-center space-x-4">
-  <div>
-    {/* Supplier Name */}
-    {optSupplier && txtCreditorName && (
-      <h3 className="text-lg font-bold text-gray-700">{`Supplier: ${txtCreditorName}`}</h3>
-    )}
+          <div className='flex justify-between items-center space-x-4'>
+            <div>
+              {/* Supplier Name */}
+              {optSupplier && txtCreditorName && (
+                <h3 className='text-lg font-bold text-gray-700'>{`Supplier: ${txtCreditorName}`}</h3>
+              )}
 
-    {/* Department Description */}
-    {selectedDepartment && optCategory && (
-      <h3 className="text-lg font-bold text-gray-700">{`Department: ${selectedDepartment.MajorNoDescription}`}</h3>
-    )}
-  </div>
-  {weekStartDate && weekEndDate && (
-  <div className="text-right text-gray-600 font-medium">
-  Date:  {`${formatDate(weekStartDate)} To ${formatDate(weekEndDate)}`}
-  </div>
-  )}
-</div>
+              {/* Department Description */}
+              {selectedDepartment && optCategory && (
+                <h3 className='text-lg font-bold text-gray-700'>{`Department: ${selectedDepartment.MajorNoDescription}`}</h3>
+              )}
+            </div>
+            {weekStartDate && weekEndDate && (
+              <div className='text-right text-gray-600 font-medium'>
+                Date: {`${formatDate(weekStartDate)} To ${formatDate(weekEndDate)}`}
+              </div>
+            )}
+          </div>
 
           <table className='min-w-full bg-white border border-gray-200'>
             <thead className='bg-gray-100'>

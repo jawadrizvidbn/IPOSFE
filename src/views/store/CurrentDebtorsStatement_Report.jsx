@@ -63,13 +63,13 @@ const CurrentDebtorsStatement_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
 
@@ -90,13 +90,13 @@ const CurrentDebtorsStatement_Report = () => {
   useEffect(() => {
     const GetCurrentDebortsDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const debtorType = selectedDebtorType === '0' ? 'Laybye' : 'Normal'
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCurrentDeborsDetails?AccountSystem=${debtorType}`
@@ -136,13 +136,13 @@ const CurrentDebtorsStatement_Report = () => {
       setClickedButtons({}) // Clear clicked button states
 
       // Ensure session and user data is available
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Authorization token
+      const token = `Bearer ${session.user.token}` // Authorization token
       const config = { headers: { Authorization: token } }
 
       // Determine debtor type based on selectedDebtorType

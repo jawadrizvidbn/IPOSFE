@@ -64,33 +64,32 @@ const Across_Report = () => {
     }
   }, [startDateFromURL, endDateFromURL]) // Re-run if URL params change
 
-
   useEffect(() => {
     const fetchData = async () => {
-        if (!session || !session.user || !session.user.id) {
-          console.error('Session data not available')
-          return
-        }
+      if (!session || !session.user || !session.user.token) {
+        console.error('Session data not available')
+        return
+      }
 
-        const token = `Bearer ${session.user.id}` // Ensure this is the correct token
-        const config = { headers: { Authorization: token } }
-            let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/accrossShopReport`
+      const token = `Bearer ${session.user.token}` // Ensure this is the correct token
+      const config = { headers: { Authorization: token } }
+      let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/accrossShopReport`
 
-            const params = new URLSearchParams();
-            // eslint-disable-next-line padding-line-between-statements
-            if (filterStartDate) params.append('startDate', filterStartDate);
-            if (filterEndDate) params.append('endDate', filterEndDate);
-             if (params.toString()) apiUrl += `?${params.toString()}`
+      const params = new URLSearchParams()
+      // eslint-disable-next-line padding-line-between-statements
+      if (filterStartDate) params.append('startDate', filterStartDate)
+      if (filterEndDate) params.append('endDate', filterEndDate)
+      if (params.toString()) apiUrl += `?${params.toString()}`
 
       try {
         const response = await axios.get(apiUrl, config)
         const responseData = response.data.finalResults || []
 
-        setGrandTotal(response.data.grandTotalQty);
+        setGrandTotal(response.data.grandTotalQty)
         console.log('Fetched Data:', responseData)
 
         if (Array.isArray(responseData) && responseData.length > 0) {
-          setData(responseData);
+          setData(responseData)
           setColumns(generateColumns(responseData[0])) // Generate columns from first data item
         } else {
           console.error('Empty or invalid response data')
@@ -99,7 +98,7 @@ const Across_Report = () => {
         console.error('Error fetching data:', error)
 
         if (error.response && error.response.status === 401) {
-          await signOut({ redirect: false });
+          await signOut({ redirect: false })
           router.push('/login')
         }
       }
@@ -132,7 +131,7 @@ const Across_Report = () => {
     setFilteredData(newData)
   }, [searchTerm, data])
 
-  const generateColumns = (dataItem) => {
+  const generateColumns = dataItem => {
     return Object.keys(dataItem).map(key =>
       columnHelper.accessor(key, {
         id: key,
@@ -140,9 +139,8 @@ const Across_Report = () => {
         header: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the header
         enableSorting: true
       })
-    );
-  };
-
+    )
+  }
 
   const handleFilterChange = e => {
     const { name, value } = e.target
@@ -158,9 +156,8 @@ const Across_Report = () => {
     data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
-
+    getSortedRowModel: getSortedRowModel()
+  })
 
   const copyToClipboard = () => {
     const table = document.querySelector('#tableContainer table')
@@ -239,8 +236,6 @@ const Across_Report = () => {
 
     document.body.innerHTML = originalContent
   }
-
-
 
   const generatePDF = async () => {
     try {
@@ -338,7 +333,6 @@ const Across_Report = () => {
         />
       </div>
 
-
       <div className='p-2'>
         {/* Flex container for inputs */}
         <div className='flex flex-row items-center justify-between mb-4'>
@@ -429,8 +423,6 @@ const Across_Report = () => {
           >
             Print
           </Button>
-
-
         </div>
       </div>
 
@@ -470,21 +462,20 @@ const Across_Report = () => {
               ))}
             </tbody>
             <tfoot>
-  <tr>
-    {table.getAllColumns().map((column, index) => (
-      <td key={index} className='p-1 border border-gray-200 text-center'>
-        {console.log(column.id, "testing")}
+              <tr>
+                {table.getAllColumns().map((column, index) => (
+                  <td key={index} className='p-1 border border-gray-200 text-center'>
+                    {console.log(column.id, 'testing')}
 
-        {/* Display "Total Qty" under the stockcode column */}
-        {column.id.trim() === 'stockcode' ? 'Total Qty' : null}
+                    {/* Display "Total Qty" under the stockcode column */}
+                    {column.id.trim() === 'stockcode' ? 'Total Qty' : null}
 
-        {/* Display grandTotal under the totalQty column */}
-        {column.id.trim() === 'totalQty' ? grandTotal : null}
-      </td>
-    ))}
-  </tr>
-</tfoot>
-
+                    {/* Display grandTotal under the totalQty column */}
+                    {column.id.trim() === 'totalQty' ? grandTotal : null}
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

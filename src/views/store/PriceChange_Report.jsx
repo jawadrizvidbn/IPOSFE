@@ -65,13 +65,13 @@ const PriceChangeReport = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
 
@@ -93,13 +93,13 @@ const PriceChangeReport = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+        const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/priceChangeReports?tableName=${id}`
 

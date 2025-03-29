@@ -184,13 +184,13 @@ const BasicDataTables = () => {
       setError(null)
 
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = session?.user?.id ? `Bearer ${session.user.id}` : ''
+        const token = session?.user?.id ? `Bearer ${session.user.token}` : ''
         const config = { headers: { Authorization: token } }
 
         const apiUrl = '${process.env.NEXT_PUBLIC_API_URL}/greystrhistory/allTblDataCurrentTran' // Replace with your actual URL

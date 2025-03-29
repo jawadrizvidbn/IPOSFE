@@ -40,6 +40,7 @@ import tableStyles from '@core/styles/table.module.css'
 // Redux imports
 import { deleteUser } from '@/redux/reducers/authSlice'
 import { thunkStatus } from '@/utils/statusHandler'
+import { useSession } from 'next-auth/react'
 
 const columnHelper = createColumnHelper()
 
@@ -72,6 +73,8 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 const AllUsers = ({ users = [] }) => {
   const dispatch = useDispatch()
   const isDeleting = useSelector(state => state.auth.deleteUserStatus === thunkStatus.LOADING)
+  const currentUser = useSelector(state => state.auth.user)
+  const { data: session, status } = useSession()
 
   const [filteredData, setFilteredData] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -159,6 +162,7 @@ const AllUsers = ({ users = [] }) => {
               size='small'
               color='error'
               className='mr-2'
+              disabled={row.original.id === session.user?.id}
               onClick={() => handleDeleteClick(row.original)}
             >
               Delete

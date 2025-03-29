@@ -65,13 +65,13 @@ const PerviousCreditorStatement_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
 
@@ -92,13 +92,13 @@ const PerviousCreditorStatement_Report = () => {
   useEffect(() => {
     const GetPerivousDebortsDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousCreditorDetails`
 
@@ -133,13 +133,13 @@ const PerviousCreditorStatement_Report = () => {
       setClickedButtons({}) // Clear clicked button states
 
       // Ensure session and user data is available
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Authorization token
+      const token = `Bearer ${session.user.token}` // Authorization token
       const config = { headers: { Authorization: token } }
 
       // Construct the API URL dynamically

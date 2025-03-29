@@ -36,7 +36,7 @@ const ColumnVisibilityRana = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        const token = session?.user?.id ? `Bearer ${session.user.id}` : ''
+        const token = session?.user?.token ? `Bearer ${session.user.token}` : ''
 
         const config = {
           headers: {
@@ -59,12 +59,12 @@ const ColumnVisibilityRana = () => {
     }
 
     fetchCompanyDetails()
-  }, [session.user.id])
+  }, [session.user.token])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-             const token = session?.user?.id ? `Bearer ${session.user.id}` : ''
+        const token = session?.user?.token ? `Bearer ${session.user.token}` : ''
 
         const config = {
           headers: {
@@ -147,7 +147,7 @@ const ColumnVisibilityRana = () => {
     }
 
     fetchData()
-  }, [session.user.id])
+  }, [session.user.token])
 
   const handleColumnVisibilityChange = event => {
     const value = event.target.value

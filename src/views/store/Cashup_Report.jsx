@@ -64,10 +64,10 @@ const ColumnVisibility = () => {
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
-      if (!session || !session.user || !session.user.id) return
+      if (!session || !session.user || !session.user.token) return
 
       try {
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`, config)
 
@@ -82,14 +82,14 @@ const ColumnVisibility = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!session?.user?.id) {
+      if (!session?.user?.token) {
         console.error('Session data not available')
 
         return
       }
 
       try {
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/currentCashupReport/${id}`
 
@@ -939,13 +939,13 @@ export default ColumnVisibility
 //   useEffect(() => {
 //     const fetchCompanyDetails = async () => {
 //       try {
-//         if (!session || !session.user || !session.user.id) {
+//         if (!session || !session.user || !session.user.token) {
 //           console.error('Session data not available')
 
 //           return
 //         }
 
-//         const token = `Bearer ${session.user.id}`
+//         const token = `Bearer ${session.user.token}`
 //         const config = { headers: { Authorization: token } }
 //         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
 
@@ -972,7 +972,7 @@ export default ColumnVisibility
 //           return;
 //         }
 
-//         const token = `Bearer ${session.user.id}`;
+//         const token = `Bearer ${session.user.token}`;
 //         const config = { headers: { Authorization: token } };
 //         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/TblDataCashupDet/${id}`;
 

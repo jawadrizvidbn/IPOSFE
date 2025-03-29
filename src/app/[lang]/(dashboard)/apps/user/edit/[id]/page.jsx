@@ -46,7 +46,7 @@ const schema = object({
   serverUser: string([minLength(1, 'This field is required')]),
   serverPassword: string([minLength(1, 'This field is required')]),
   allowedStores: array(string()),
-  gracePeriod: number([minLength(1, 'This field is required')])
+  gracePeriod: string([minLength(1, 'This field is required')])
 })
 
 const EditUser = ({ params }) => {
@@ -86,7 +86,7 @@ const EditUser = ({ params }) => {
       serverUser: '',
       serverPassword: '',
       allowedStores: [],
-      gracePeriod: 0
+      gracePeriod: ''
     }
   })
 
@@ -102,15 +102,15 @@ const EditUser = ({ params }) => {
           name: userData.name,
           email: userData.email,
           // permissions: JSON.parse(userData.permissions || '[]'),
-          permissions: userData.permissions,
+          permissions: userData.permissions || [],
           plan: userData.plan,
           planStartDate: userData.planStartDate,
           planEndDate: userData.planEndDate,
           serverHost: userData.serverHost,
           serverUser: userData.serverUser,
           serverPassword: userData.serverPassword,
-          allowedStores: userData.allowedStores,
-          gracePeriod: userData.gracePeriod ? Number(userData.gracePeriod) : 0
+          allowedStores: userData.allowedStores || [],
+          gracePeriod: userData.gracePeriod ? String(userData.gracePeriod) : ''
         })
 
         // Connect to server automatically
@@ -263,7 +263,7 @@ const EditUser = ({ params }) => {
                           )
                         }}
                         InputLabelProps={{ shrink: true }}
-                        autoComplete='off'
+                        autoComplete='new-password'
                       />
                     )}
                   />
@@ -304,6 +304,7 @@ const EditUser = ({ params }) => {
                         InputLabelProps={{ shrink: true }}
                         error={!!errors.serverUser}
                         helperText={errors.serverUser?.message}
+                        autoComplete='off'
                       />
                     )}
                   />
