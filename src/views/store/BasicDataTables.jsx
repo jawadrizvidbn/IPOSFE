@@ -24,7 +24,7 @@ const BasicDataTables = () => {
   // Fetch shops based on user session
   const fetchShops = useCallback(async () => {
     if (!session) return // Ensure session is defined before fetching
-    const token = session.user.token
+    const token = session?.user?.token
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/getallshop`, {
