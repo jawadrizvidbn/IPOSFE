@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 
+import { useSearchParams } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -8,9 +9,11 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography' // Added for improved typography handling
 
 import styles from '@core/styles/table.module.css'
+import { getLocalizedUrl } from '@/utils/i18n'
 
 const BasicDataTables = () => {
-  const shopKey = useSelector(state => state.shopKey)
+  const search = useSearchParams()
+  const shopKey = search.get('shopKey')
   const displayShopKey = shopKey ? shopKey.toUpperCase() : 'DEFAULT SHOP'
 
   // Reports categorized by type
@@ -18,97 +21,102 @@ const BasicDataTables = () => {
     {
       title: 'Sales Reports',
       reports: [
-        { label: 'Item Sales Reports', href: '/item_sales_dump_data' },
-        { label: 'Daily Sales Reports', href: '/item_daliy_dump_data' },
-        { label: 'Cashup Reports', href: '/cashup_sales_dump_data' },
-        { label: 'Refunds Reports', href: '/refunds_dump_data' },
-        { label: 'Adjustment Reports', href: '/adjustment_dump_data' },
-        { label: 'GRV Reports', href: '/grv_dump_data' },
-        { label: 'GRV2 Reports', href: '/grv2_dump_data' },
-        { label: 'VOID Reports', href: '/Void_dump_data' },
-        { label: 'Price Change Reports', href: '/PriceChange_dump_data' },
-        { label: 'Payout Reports', href: '/payout_dump_data' },
-        { label: 'Cashup Report By Clerk', href: '/CachupReportByClerk_dump_data' }
+        { label: 'Item Sales Reports', href: getLocalizedUrl('/item_sales_dump_data', 'en') },
+        { label: 'Daily Sales Reports', href: getLocalizedUrl('/item_daliy_dump_data', 'en') },
+        { label: 'Cashup Reports', href: getLocalizedUrl('/cashup_sales_dump_data', 'en') },
+        { label: 'Refunds Reports', href: getLocalizedUrl('/refunds_dump_data', 'en') },
+        { label: 'Adjustment Reports', href: getLocalizedUrl('/adjustment_dump_data', 'en') },
+        { label: 'GRV Reports', href: getLocalizedUrl('/grv_dump_data', 'en') },
+        { label: 'GRV2 Reports', href: getLocalizedUrl('/grv2_dump_data', 'en') },
+        { label: 'VOID Reports', href: getLocalizedUrl('/Void_dump_data', 'en') },
+        { label: 'Price Change Reports', href: getLocalizedUrl('/PriceChange_dump_data', 'en') },
+        { label: 'Payout Reports', href: getLocalizedUrl('/payout_dump_data', 'en') },
+        { label: 'Cashup Report By Clerk', href: getLocalizedUrl('/CachupReportByClerk_dump_data', 'en') }
       ]
     },
     {
       title: 'Debtors Reports',
       reports: [
-        { label: 'Debtors Credit Notes Reports', href: '/DebtorsCreditNotes_dump_data' },
-        { label: 'Debtors Debit Notes Reports', href: '/DebtorsDebitNotes_dump_data' },
-        { label: 'Debtors Invoices Reports', href: '/DebtorsInvoices_dump_data' },
-        { label: 'Debtors Payments Reports', href: '/DebtorsPayment_dump_data' },
-        { label: 'Debtors Value Report', href: '/DebtorsValue_Report' }
+        { label: 'Debtors Credit Notes Reports', href: getLocalizedUrl('/DebtorsCreditNotes_dump_data', 'en') },
+        { label: 'Debtors Debit Notes Reports', href: getLocalizedUrl('/DebtorsDebitNotes_dump_data', 'en') },
+        { label: 'Debtors Invoices Reports', href: getLocalizedUrl('/DebtorsInvoices_dump_data', 'en') },
+        { label: 'Debtors Payments Reports', href: getLocalizedUrl('/DebtorsPayment_dump_data', 'en') },
+        { label: 'Debtors Value Report', href: getLocalizedUrl('/DebtorsValue_Report', 'en') }
       ]
     },
     {
       title: 'Creditors Reports',
       reports: [
-        { label: 'Creditors Credit Notes Reports', href: '/CreditorsCreditNotes_dump_data' },
-        { label: 'Creditors Debit Notes Reports', href: '/CreditorsDebitNotes_dump_data' },
-        { label: 'Creditors Invoices Reports', href: '/CreditorsInvoices_dump_data' },
-        { label: 'Creditors Payments Reports', href: '/CreditorPayment_dump_data' },
-        { label: 'Creditors Value Report', href: '/CreditorsValue_Report' }
+        { label: 'Creditors Credit Notes Reports', href: getLocalizedUrl('/CreditorsCreditNotes_dump_data', 'en') },
+        { label: 'Creditors Debit Notes Reports', href: getLocalizedUrl('/CreditorsDebitNotes_dump_data', 'en') },
+        { label: 'Creditors Invoices Reports', href: getLocalizedUrl('/CreditorsInvoices_dump_data', 'en') },
+        { label: 'Creditors Payments Reports', href: getLocalizedUrl('/CreditorPayment_dump_data', 'en') },
+        { label: 'Creditors Value Report', href: getLocalizedUrl('/CreditorsValue_Report', 'en') } // done till here
       ]
     },
     {
       title: 'Invoice Reports',
       reports: [
-        { label: 'History Product Sale By Invoice', href: '/productBySaleInvoice_dump_data' },
-        { label: 'Current Invoices', href: '/current_invoices_dump_data' },
-        { label: 'Invoices By Station', href: '/HistoryInvoicesByStation_dump_data' },
-        { label: 'Invoices By Clerk', href: '/InvoicesByClerk_dump_data' }
+        { label: 'History Product Sale By Invoice', href: getLocalizedUrl('/productBySaleInvoice_dump_data', 'en') },
+        { label: 'Current Invoices', href: getLocalizedUrl('/current_invoices_dump_data', 'en') },
+        { label: 'Invoices By Station', href: getLocalizedUrl('/HistoryInvoicesByStation_dump_data', 'en') },
+        { label: 'Invoices By Clerk', href: getLocalizedUrl('/InvoicesByClerk_dump_data', 'en') }
       ]
     },
     {
       title: 'Stock Reports',
       reports: [
-        { label: 'Stock Value Report', href: '/StockValue_Report' },
-        { label: 'Stock Activity Reports', href: '/StockActivity_dump_data' },
-        { label: 'Stock On Hand Reports', href: '/StockOnHand_Report' }
+        { label: 'Stock Value Report', href: getLocalizedUrl('/StockValue_Report', 'en') },
+        { label: 'Stock Activity Reports', href: getLocalizedUrl('/StockActivity_dump_data', 'en') },
+        { label: 'Stock On Hand Reports', href: getLocalizedUrl('/StockOnHand_Report', 'en') }
       ]
     },
     {
       title: 'Debtors Analysis Reports',
       reports: [
-        { label: 'Current Debtors Analysis', href: '/CurrentDebtorsAnalysisReport' },
-        { label: 'Current Creditors Age Analysis ', href: '/CurrentCreditorsAgeAnalysisReport' },
-        { label: 'Current Debtors Age AnalysisReport ', href: '/CurrentDebtorsAgeAnalysisReport' }
+        { label: 'Current Debtors Analysis', href: getLocalizedUrl('/CurrentDebtorsAnalysisReport', 'en') },
+        { label: 'Current Creditors Age Analysis ', href: getLocalizedUrl('/CurrentCreditorsAgeAnalysisReport', 'en') },
+        {
+          label: 'Current Debtors Age AnalysisReport ',
+          href: getLocalizedUrl('/CurrentDebtorsAgeAnalysisReport', 'en')
+        }
       ]
     },
     {
       title: 'Stock Level Reports',
       reports: [
-        { label: 'Min Stock Level', href: '/MinStockLevelReport' },
-        { label: 'Max Stock Level Report', href: '/MaxStockLevelReport' }
+        { label: 'Min Stock Level', href: getLocalizedUrl('/MinStockLevelReport', 'en') },
+        { label: 'Max Stock Level Report', href: getLocalizedUrl('/MaxStockLevelReport', 'en') }
       ]
     },
     {
       title: 'Pervious Debtors Age Analysis Report',
-      reports: [{ label: 'Pervious Debtors Age Analysis', href: '/PerviousDebtorsAgeAnalysisReport' }]
+      reports: [
+        { label: 'Pervious Debtors Age Analysis', href: getLocalizedUrl('/PerviousDebtorsAgeAnalysisReport', 'en') }
+      ]
     },
     {
       title: 'Creditor Analysis Report',
-      reports: [{ label: 'Creditor Analysis', href: '/CreditorAnalysisReport' }]
+      reports: [{ label: 'Creditor Analysis', href: getLocalizedUrl('/CreditorAnalysisReport', 'en') }]
     },
     {
       title: 'Six Weeks Report',
-      reports: [{ label: 'Six Weeks', href: '/SixWeeks_Report' }]
+      reports: [{ label: 'Six Weeks', href: getLocalizedUrl('/SixWeeks_Report', 'en') }]
     },
     {
       title: 'Sale Rep Commission Report',
       reports: [
-        { label: 'Sale Rep Commission', href: '/SaleRepCommissionReport' },
-        { label: 'Sale Rep Commission By Product', href: '/SaleRepCommissionByProductReport' }
+        { label: 'Sale Rep Commission', href: getLocalizedUrl('/SaleRepCommissionReport', 'en') },
+        { label: 'Sale Rep Commission By Product', href: getLocalizedUrl('/SaleRepCommissionByProductReport', 'en') }
       ]
     },
     {
       title: 'Statements Report',
       reports: [
-        { label: 'Current Debort Statement', href: '/CurrentDebtorsStatementReport' },
-        { label: 'Perivous Debort Statement', href: '/PerviousDebtorsStatementReport' },
-        { label: 'Current Creditor Statement', href: '/CurrentCreditorStatementReport' },
-        { label: 'Perivous Creditor Statement', href: '/PerviousCreditorStatementReport' }
+        { label: 'Current Debort Statement', href: getLocalizedUrl('/CurrentDebtorsStatementReport', 'en') },
+        { label: 'Perivous Debort Statement', href: getLocalizedUrl('/PerviousDebtorsStatementReport', 'en') },
+        { label: 'Current Creditor Statement', href: getLocalizedUrl('/CurrentCreditorStatementReport', 'en') },
+        { label: 'Perivous Creditor Statement', href: getLocalizedUrl('/PerviousCreditorStatementReport', 'en') }
       ]
     }
   ]
@@ -137,7 +145,7 @@ const BasicDataTables = () => {
             <Grid container spacing={2} justifyContent='center'>
               {category.reports.map((item, index) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                  <Link href={item.href} passHref>
+                  <Link href={{ pathname: item.href, query: { shopKey } }} passHref>
                     <button
                       className={`w-full py-4 text-white text-lg ${styles.customButton}`}
                       aria-label={`Navigate to ${item.label}`}

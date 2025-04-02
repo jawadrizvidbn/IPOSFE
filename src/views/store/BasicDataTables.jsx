@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useDispatch, useSelector } from 'react-redux'
 import Card from '@mui/material/Card'
@@ -15,9 +15,10 @@ const BasicDataTables = () => {
   const [loading, setLoading] = useState(true)
   const [shopKeys, setShopKeys] = useState([])
   const router = useRouter()
+  const search = useSearchParams()
   const dispatch = useDispatch()
   const currentShopKey = useSelector(state => state.shopKey)
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
 
   // Fetch shops based on user session
   const fetchShops = useCallback(async () => {
@@ -48,14 +49,12 @@ const BasicDataTables = () => {
     } finally {
       setLoading(false) // Set loading to false once data is fetched
     }
-  }, [session, router])
+  }, [session, router, sessionStatus])
 
   // Effect to fetch shops when session is available
   useEffect(() => {
-    if (session) {
-      fetchShops()
-    }
-  }, [session, fetchShops])
+    if (sessionStatus === 'authenticated') fetchShops()
+  }, [sessionStatus])
 
   // Handle shop selection
   const handleShopClick = async shopKey => {
@@ -74,7 +73,12 @@ const BasicDataTables = () => {
       if (!response.ok) throw new Error('Error activating shop')
 
       dispatch(setShopKey(shopKey))
-      router.push('/reports')
+      const query = new URLSearchParams()
+      query.set('shopKey', shopKey)
+
+      const url = getLocalizedUrl(`/reports?${query.toString()}`, 'en')
+      router.push(url)
+      console.log(`Dispatched shopKey: ${shopKey}`)
     } catch (error) {
       if (error.response && error.response.status === 401) {
         signOut({ redirect: false })

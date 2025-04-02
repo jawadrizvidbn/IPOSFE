@@ -8,12 +8,10 @@ import AllCreditorsDebitNotesTablesRecord from '@views/store/Creditors_Debit_Not
 
 // Component imports
 
-
 const Tables = () => {
   return (
     <Grid container spacing={6}>
-
-<Grid item xs={12}>
+      <Grid item xs={12}>
         <AllCreditorsDebitNotesTablesRecord />
       </Grid>
     </Grid>

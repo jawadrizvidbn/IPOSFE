@@ -74,7 +74,7 @@ const BasicDataTables = () => {
       }
 
       dispatch(setShopKey(shopKey))
-      router.push('/reports')
+      router.push(`/reports?shopKey=${shopKey}`)
       console.log(`Dispatched shopKey: ${shopKey}`)
     } catch (error) {
       if (error.response.status === 401) {

@@ -53,6 +53,7 @@ const DebtorsValue_Report = () => {
   const [grandTotal, setGrandTotal] = useState(null) // State for grand total
   const [sorting, setSorting] = useState([]) // State for sorting
   const [searchTerm, setSearchTerm] = useState('')
+  const shopKey = searchParams.get('shopKey')
 
   useEffect(() => {
     if (startDateFromURL) {
@@ -74,7 +75,7 @@ const DebtorsValue_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -102,7 +103,7 @@ const DebtorsValue_Report = () => {
 
         const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/DebtorsValueReport`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/DebtorsValueReport?shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
