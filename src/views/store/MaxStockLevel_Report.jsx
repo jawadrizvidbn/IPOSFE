@@ -54,6 +54,8 @@ const MaxStockLevel_Report = () => {
   const [sorting, setSorting] = useState([]) // State for sorting
   const [searchTerm, setSearchTerm] = useState('')
 
+  const shopKey = searchParams.get('searchParams')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
@@ -65,7 +67,7 @@ const MaxStockLevel_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -80,7 +82,7 @@ const MaxStockLevel_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,7 +95,7 @@ const MaxStockLevel_Report = () => {
 
         const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/MaxStockLevelReport`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/MaxStockLevelReport?shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
@@ -286,7 +288,7 @@ const MaxStockLevel_Report = () => {
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, id, router, shopKey])
 
   // Filter data based on search term
   useEffect(() => {

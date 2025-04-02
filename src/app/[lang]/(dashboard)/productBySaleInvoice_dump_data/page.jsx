@@ -8,12 +8,10 @@ import ProductBySaleInvoiceTablesRecord from '@views/store/productBySaleInvoice_
 
 // Component imports
 
-
 const Tables = () => {
   return (
     <Grid container spacing={6}>
-
-<Grid item xs={12}>
+      <Grid item xs={12}>
         <ProductBySaleInvoiceTablesRecord />
       </Grid>
     </Grid>

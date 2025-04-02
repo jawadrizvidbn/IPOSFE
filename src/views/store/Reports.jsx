@@ -51,7 +51,7 @@ const BasicDataTables = () => {
         { label: 'Creditors Debit Notes Reports', href: getLocalizedUrl('/CreditorsDebitNotes_dump_data', 'en') },
         { label: 'Creditors Invoices Reports', href: getLocalizedUrl('/CreditorsInvoices_dump_data', 'en') },
         { label: 'Creditors Payments Reports', href: getLocalizedUrl('/CreditorPayment_dump_data', 'en') },
-        { label: 'Creditors Value Report', href: getLocalizedUrl('/CreditorsValue_Report', 'en') } // done till here
+        { label: 'Creditors Value Report', href: getLocalizedUrl('/CreditorsValue_Report', 'en') }
       ]
     },
     {

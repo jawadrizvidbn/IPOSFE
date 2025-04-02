@@ -97,7 +97,7 @@ const AllDataHistoryItemSalesRecords = () => {
     if (startDate && endDate) {
       validateDateRange()
     }
-  }, [startDate, endDate, session, startName, endName, shopKey]) // Trigger useEffect when startDate or endDate changes
+  }, [startDate, endDate, session?.user?.token, startName, endName, shopKey]) // Trigger useEffect when startDate or endDate changes
 
   useEffect(() => {
     if (data.length > 0) {

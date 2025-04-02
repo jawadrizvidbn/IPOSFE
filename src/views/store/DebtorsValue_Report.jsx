@@ -90,7 +90,7 @@ const DebtorsValue_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.token?.user])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -282,7 +282,7 @@ const DebtorsValue_Report = () => {
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, id, router])
 
   useEffect(() => {
     const filtered = data?.filter(item => {

@@ -55,6 +55,8 @@ const SixWeeks_Report = () => {
   const [sorting, setSorting] = useState([]) // State for sorting
   const [searchTerm, setSearchTerm] = useState('')
 
+  const shopKey = searchParams.get('shopKey')
+
   // State for form inputs
   const [optSupplier, setOptSupplier] = useState(false)
   const [optCategory, setOptCategory] = useState(false)
@@ -82,7 +84,7 @@ const SixWeeks_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -97,14 +99,14 @@ const SixWeeks_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchDepartmentsAndCategories = async () => {
       try {
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -115,14 +117,14 @@ const SixWeeks_Report = () => {
     }
 
     fetchDepartmentsAndCategories()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchCreditoritemsGrouping = async () => {
       try {
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CreditoritemsGrouping`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CreditoritemsGrouping?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -134,7 +136,7 @@ const SixWeeks_Report = () => {
     }
 
     fetchCreditoritemsGrouping()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   // Log the updated state after it changes
   useEffect(() => {
@@ -175,7 +177,7 @@ const SixWeeks_Report = () => {
 
       const token = `Bearer ${session.user.token}` // Ensure this is the correct token
       const config = { headers: { Authorization: token } }
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/SixWeekReport`
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/SixWeekReport?shopKey=${shopKey}`
 
       const requestBody = {
         OptSupplier: optSupplier,

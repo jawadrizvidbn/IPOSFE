@@ -106,7 +106,7 @@ const AllDataHistoryItemSalesRecords = () => {
     if (startDate && endDate) {
       validateDateRange()
     }
-  }, [startDate, endDate, session, startName, endName, router, shopKey]) // Trigger useEffect when startDate or endDate changes
+  }, [startDate, endDate, session?.user?.token, startName, endName, router, shopKey]) // Trigger useEffect when startDate or endDate changes
 
   useEffect(() => {
     if (data.length > 0) {
@@ -148,7 +148,7 @@ const AllDataHistoryItemSalesRecords = () => {
     const formattedEndDate = endDate ? formatDate(endDate) : ''
 
     // Construct the URL with date and name query strings
-    const queryString = `${nameQueryString}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+    const queryString = `${nameQueryString}&startDate=${formattedStartDate}&endDate=${formattedEndDate}&shopKey=${shopKey}`
 
     window.location.href = `/en/refunds_reports?${queryString}`
   }

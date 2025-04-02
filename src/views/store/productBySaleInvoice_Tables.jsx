@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Card, CardHeader } from '@mui/material'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
@@ -32,7 +32,8 @@ const ProductBySaleInvoiceTablesRecord = () => {
   const [endDate, setEndDate] = useState(null)
   const { data: session } = useSession()
   const router = useRouter()
-  const shopKey = useSelector(state => state.shopKey)
+  const search = useSearchParams()
+  const shopKey = search.get('shopKey')
   const [isDateValid, setIsDateValid] = useState(false) // State to track if valid date range is selected
 
   const formatDate = date => {
@@ -65,7 +66,8 @@ const ProductBySaleInvoiceTablesRecord = () => {
         const response = await axios.get(apiUrl, {
           params: {
             startName,
-            endName
+            endName,
+            shopKey
           },
           headers: config.headers
         })
@@ -104,7 +106,7 @@ const ProductBySaleInvoiceTablesRecord = () => {
     if (startDate && endDate) {
       validateDateRange()
     }
-  }, [startDate, endDate, session, startName, endName, router]) // Trigger useEffect when startDate or endDate changes
+  }, [startDate, endDate, session?.user?.token, startName, endName, router, shopKey]) // Trigger useEffect when startDate or endDate changes
 
   useEffect(() => {
     if (data.length > 0) {

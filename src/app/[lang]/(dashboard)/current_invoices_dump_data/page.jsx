@@ -8,12 +8,10 @@ import Current_invoices from '@views/store/Current_invoices'
 
 // Component imports
 
-
 const Tables = () => {
   return (
     <Grid container spacing={6}>
-
-<Grid item xs={12}>
+      <Grid item xs={12}>
         <Current_invoices />
       </Grid>
     </Grid>

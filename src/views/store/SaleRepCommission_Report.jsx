@@ -56,6 +56,8 @@ const SaleRepCommission_Report = () => {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
@@ -67,7 +69,7 @@ const SaleRepCommission_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -82,7 +84,7 @@ const SaleRepCommission_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const fetchData = async () => {
     try {
@@ -94,7 +96,7 @@ const SaleRepCommission_Report = () => {
 
       const token = `Bearer ${session.user.token}` // Ensure this is the correct token
       const config = { headers: { Authorization: token } }
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/SaleRepCommissionReport`
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/SaleRepCommissionReport?shopKey=${shopKey}`
 
       // Payload for the POST request
       const payload = {

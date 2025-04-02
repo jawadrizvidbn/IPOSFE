@@ -14,6 +14,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 const BasicDataTables = () => {
   const [loading, setLoading] = useState(true)
   const [shopKeys, setShopKeys] = useState([])
+  const [shopLoading, setShopLoading] = useState(false)
   const router = useRouter()
   const search = useSearchParams()
   const dispatch = useDispatch()
@@ -63,6 +64,7 @@ const BasicDataTables = () => {
     const token = session.user.token
 
     try {
+      setShopLoading(shopKey)
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/activedatabase/${shopKey}`, {
         method: 'GET',
         headers: {
@@ -86,6 +88,8 @@ const BasicDataTables = () => {
       } else {
         console.error('Error activating shop:', error)
       }
+    } finally {
+      setShopLoading(false)
     }
   }
 
@@ -120,10 +124,11 @@ const BasicDataTables = () => {
             return (
               <button
                 key={index}
+                disabled={shopLoading}
                 onClick={() => handleShopClick(shopKey)}
                 className='w-full h-14 text-xl text-orange-600 border border-orange-600 py-2 px-4 rounded-full hover:bg-orange-600 hover:text-white transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg animate-button'
               >
-                {formattedShopKey}
+                {shopLoading === shopKey ? 'Loading...' : formattedShopKey}
               </button>
             )
           })

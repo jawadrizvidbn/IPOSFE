@@ -59,6 +59,8 @@ const CurrentCreditorStatement_Report = () => {
   const [selectedCreditor, setSelectedCreditor] = useState('0')
   const [loading, setLoading] = useState(false)
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
@@ -70,7 +72,7 @@ const CurrentCreditorStatement_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -85,7 +87,8 @@ const CurrentCreditorStatement_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const GetCurrentCreditorDetails = async () => {
       try {
@@ -98,7 +101,7 @@ const CurrentCreditorStatement_Report = () => {
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
 
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCurrentCreditorDetails`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCurrentCreditorDetails?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -109,7 +112,7 @@ const CurrentCreditorStatement_Report = () => {
     }
 
     GetCurrentCreditorDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const handleSelectChange = e => {
     setSelectedCreditor(e.target.value)
@@ -147,9 +150,9 @@ const CurrentCreditorStatement_Report = () => {
       // Construct the API URL dynamically
       const apiUrl = `${
         process.env.NEXT_PUBLIC_API_URL
-      }/database/CurrentCreditorStatementReport?cmbCode=${selectedCreditor}${dateFrom ? `&startDate=${dateFrom}` : ''}${
-        dateTo ? `&endDate=${dateTo}` : ''
-      }`
+      }/database/CurrentCreditorStatementReport?cmbCode=${selectedCreditor}&shopKey=${shopKey}${
+        dateFrom ? `&startDate=${dateFrom}` : ''
+      }${dateTo ? `&endDate=${dateTo}` : ''}`
 
       // Validate and log the API URL
       console.log('API URL:', apiUrl)

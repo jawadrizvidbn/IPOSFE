@@ -63,6 +63,8 @@ const StockOnHand_Report = () => {
   const [selectedSub2No, setSelectedSub2No] = useState('')
   const [hiddenProducts, setHiddenProducts] = useState(false)
 
+  const searchParams = useSearchParams()
+  const shopKey = searchParams.get('shopKey')
   const [settings, setSettings] = useState({
     includeNegativeStockonHand: false,
     includeNegativeLastCostPrice: false,
@@ -90,7 +92,7 @@ const StockOnHand_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -105,13 +107,14 @@ const StockOnHand_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const fetchDepartmentsAndCategories = async () => {
       try {
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -122,7 +125,7 @@ const StockOnHand_Report = () => {
     }
 
     fetchDepartmentsAndCategories()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const handleDepartmentChange = e => {
     const value = e.target.value

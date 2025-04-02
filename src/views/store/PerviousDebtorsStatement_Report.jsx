@@ -63,6 +63,8 @@ const PerviousDebtorsStatement_Report = () => {
   const [selectedPreviousDate, setSelectedPreviousDate] = useState('')
   const [selectedCurrentDate, setSelectedCurrentDate] = useState('')
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
@@ -74,7 +76,7 @@ const PerviousDebtorsStatement_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -89,7 +91,8 @@ const PerviousDebtorsStatement_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const GetPerivousDebortsDetails = async () => {
       try {
@@ -101,7 +104,7 @@ const PerviousDebtorsStatement_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousDeborsDetails`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousDeborsDetails?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -112,7 +115,7 @@ const PerviousDebtorsStatement_Report = () => {
     }
 
     GetPerivousDebortsDetails()
-  }, [session, selectedDebtorType])
+  }, [session?.user?.token, shopKey, selectedDebtorType])
 
   const formatDate = dateString => {
     const date = new Date(dateString) // Convert string to date
@@ -148,7 +151,7 @@ const PerviousDebtorsStatement_Report = () => {
       // Construct the API URL dynamically
       const apiUrl = `${
         process.env.NEXT_PUBLIC_API_URL
-      }/database/PreviousDebtorsStatementReport?cmbCode=${selectedDebtor}${
+      }/database/PreviousDebtorsStatementReport?cmbCode=${selectedDebtor}&shopKey=${shopKey}${
         selectedPreviousDate ? `&startDate=${selectedPreviousDate}` : ''
       }${selectedCurrentDate ? `&endDate=${selectedCurrentDate}` : ''}`
 

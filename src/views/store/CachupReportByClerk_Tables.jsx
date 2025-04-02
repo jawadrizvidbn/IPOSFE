@@ -106,7 +106,7 @@ const AllCachupReportByClerkTablesRecord = () => {
     if (startDate && endDate) {
       validateDateRange()
     }
-  }, [startDate, endDate, session, startName, endName, router, shopKey]) // Trigger useEffect when startDate or endDate changes
+  }, [startDate, endDate, session?.user?.token, startName, endName, router, shopKey]) // Trigger useEffect when startDate or endDate changes
 
   useEffect(() => {
     if (data.length > 0) {
