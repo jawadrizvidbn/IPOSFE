@@ -53,6 +53,7 @@ const ColumnVisibility = () => {
   const [grandTotal, setGrandTotal] = useState(null) // State for grand total
   const [sorting, setSorting] = useState([]) // State for sorting
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -73,7 +74,7 @@ const ColumnVisibility = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -88,7 +89,7 @@ const ColumnVisibility = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,7 +102,7 @@ const ColumnVisibility = () => {
 
         const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CurrentGRVandGoodsRecivedNotes-Reports?tableName=${id}`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CurrentGRVandGoodsRecivedNotes-Reports?tableName=${id}&shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
@@ -195,7 +196,7 @@ const ColumnVisibility = () => {
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, shopKey, id, router])
 
   useEffect(() => {
     const filtered = data?.filter(item => {

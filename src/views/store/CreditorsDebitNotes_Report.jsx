@@ -55,6 +55,7 @@ const CreditorsDebitNotes_Report = () => {
   const [nodatamessage, setNoDataMessage] = useState('')
   const [loading, setLoading] = useState(true) // Add loading state
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -75,7 +76,7 @@ const CreditorsDebitNotes_Report = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -90,7 +91,7 @@ const CreditorsDebitNotes_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,7 +104,7 @@ const CreditorsDebitNotes_Report = () => {
 
         const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/creditorsDebitNotesReports?tableName=${id}`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/creditorsDebitNotesReports?tableName=${id}&shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
@@ -200,7 +201,7 @@ const CreditorsDebitNotes_Report = () => {
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, id, router, shopKey])
 
   useEffect(() => {
     const filtered = data?.filter(item => {

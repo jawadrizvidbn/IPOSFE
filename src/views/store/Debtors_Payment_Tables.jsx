@@ -148,7 +148,7 @@ const AllDebtorsPaymentTablesRecord = () => {
     const formattedEndDate = endDate ? formatDate(endDate) : ''
 
     // Construct the URL with date and name query strings
-    const queryString = `${nameQueryString}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+    const queryString = `${nameQueryString}&startDate=${formattedStartDate}&endDate=${formattedEndDate}&shopKey=${shopKey}`
 
     window.location.href = `/en/DebtorsPayment_Report?${queryString}`
   }

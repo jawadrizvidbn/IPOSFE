@@ -53,6 +53,7 @@ const StockActivityReport = () => {
   const [grandTotal, setGrandTotal] = useState(null) // State for grand total
   const [sorting, setSorting] = useState([]) // State for sorting
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -73,7 +74,7 @@ const StockActivityReport = () => {
 
         const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token }, timeout: 10000 }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -88,7 +89,7 @@ const StockActivityReport = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,7 +102,7 @@ const StockActivityReport = () => {
 
         const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/stockActivityReports?tableName=${id}`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/stockActivityReports?tableName=${id}&shopKey=${shopKey}`
 
         // Validate API URL
 
@@ -280,7 +281,7 @@ const StockActivityReport = () => {
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, id, router, shopKey])
 
   useEffect(() => {
     const filtered = data?.filter(item => {
