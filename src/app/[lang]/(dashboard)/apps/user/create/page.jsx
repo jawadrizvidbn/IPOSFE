@@ -18,11 +18,11 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { FormControl, InputLabel, Select } from '@mui/material'
 
 // Third-party Imports
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { email, object, minLength, string, number, array } from 'valibot'
+import { useRouter } from 'next/navigation'
 
 // Redux Imports
 import {
@@ -34,6 +34,7 @@ import { thunkStatus } from '@/utils/statusHandler'
 import { getAllPlans } from '@/redux/reducers/planSlice'
 import { getAllPermissions } from '@/redux/reducers/permissionSlice'
 import { createUser } from '@/redux/reducers/authSlice'
+import { getLocalizedUrl } from '@/utils/i18n'
 
 const schema = object({
   name: string([minLength(3, 'Name must be at least 3 characters long')]),
@@ -47,12 +48,14 @@ const schema = object({
   serverUser: string([minLength(1, 'This field is required')]),
   serverPassword: string([minLength(1, 'This field is required')]),
   allowedStores: array(string()),
-  gracePeriod: string([minLength(1, 'This field is required')])
+  gracePeriod: string([minLength(1, 'This field is required')]),
+  referenceNumber: string([minLength(11, 'Reference must be 3 letters + 8 digits')])
 })
 
 const CreateUser = () => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isServerPasswordShown, setIsServerPasswordShown] = useState(false)
 
   // Redux
   const dispatch = useDispatch()
@@ -63,6 +66,8 @@ const CreateUser = () => {
   // For debugging only
   const isConnecting = useSelector(state => state.database.connectNewServerStatus === thunkStatus.LOADING)
   const getAllPlansLoading = useSelector(state => state.plan.getAllPlansStatus === thunkStatus.LOADING)
+  const createUserLoading = useSelector(state => state.auth.createUserStatus === thunkStatus.LOADING)
+  const router = useRouter()
   // Hooks
   const {
     control,
@@ -84,9 +89,30 @@ const CreateUser = () => {
       serverUser: '',
       serverPassword: '',
       allowedStores: [],
-      gracePeriod: 0
+      gracePeriod: 0,
+      referenceNumber: ''
     }
   })
+
+  const generateReferenceNumber = () => {
+    const ref = getValues('referenceNumber')?.toUpperCase() || ''
+
+    if (ref.length === 0) {
+      toast.error('Please enter a 3-letter prefix before generating reference number')
+      return
+    }
+
+    if (!/^[A-Z]{3}$/.test(ref)) {
+      toast.error('Prefix must be exactly 3 uppercase letters')
+      return
+    }
+
+    const numbers = Math.floor(10000000 + Math.random() * 90000000).toString()
+    const finalRef = ref + numbers
+
+    const currentValues = getValues()
+    reset({ ...currentValues, referenceNumber: finalRef })
+  }
 
   useEffect(() => {
     dispatch(getAllPlans())
@@ -99,6 +125,8 @@ const CreateUser = () => {
   }, [])
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleClickShowServerPassword = () => setIsServerPasswordShown(show => !show)
 
   const handleConnectServer = async () => {
     const { serverHost, serverUser, serverPassword } = getValues()
@@ -123,10 +151,10 @@ const CreateUser = () => {
 
       dispatch(createUser(data))
       // Reset form after successful submission
-      // reset()
-
+      reset()
+      router.replace(getLocalizedUrl('apps/user/list'))
       // Display success message
-      // toast.success('User added successfully')
+      toast.success('User added successfully')
     } catch (error) {
       // Display error message
       toast.error('Failed to add user')
@@ -158,6 +186,7 @@ const CreateUser = () => {
                   }
                 )(e)
               }}
+              // onSubmit={handleSubmit(onSubmit)}
             >
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
@@ -201,7 +230,7 @@ const CreateUser = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <Controller
                     name='password'
                     control={control}
@@ -230,7 +259,38 @@ const CreateUser = () => {
                             </InputAdornment>
                           )
                         }}
+                        autoComplete='new-password'
                         InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='referenceNumber'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Reference Number'
+                        placeholder='ABC12345678'
+                        inputProps={{ maxLength: 11, style: { textTransform: 'uppercase' } }}
+                        value={field.value?.toUpperCase() || ''}
+                        onChange={e => field.onChange(e.target.value.toUpperCase())}
+                        error={!!errors.referenceNumber}
+                        helperText={errors.referenceNumber?.message}
+                        InputLabelProps={{ shrink: true }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <Button variant='outlined' size='small' onClick={generateReferenceNumber}>
+                                Generate
+                              </Button>
+                            </InputAdornment>
+                          )
+                        }}
                       />
                     )}
                   />
@@ -284,11 +344,25 @@ const CreateUser = () => {
                         {...field}
                         fullWidth
                         label='Server Password'
-                        type='password'
+                        type={isServerPasswordShown ? 'text' : 'password'}
                         variant='outlined'
                         InputLabelProps={{ shrink: true }}
                         error={!!errors.serverPassword}
                         helperText={errors.serverPassword?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                onClick={handleClickShowServerPassword}
+                                onMouseDown={e => e.preventDefault()}
+                                aria-label='toggle server password visibility'
+                                edge='end'
+                              >
+                                <i className={isServerPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
                       />
                     )}
                   />
@@ -469,8 +543,8 @@ const CreateUser = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Button variant='contained' color='primary' type='submit' fullWidth>
-                    Add User
+                  <Button variant='contained' color='primary' type='submit' fullWidth disabled={createUserLoading}>
+                    {createUserLoading ? 'Adding User...' : 'Add User'}
                   </Button>
                 </Grid>
               </Grid>

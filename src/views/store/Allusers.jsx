@@ -162,7 +162,7 @@ const AllUsers = ({ users = [] }) => {
               size='small'
               color='error'
               className='mr-2'
-              disabled={row.original.id === session.user?.id}
+              disabled={row.original.id === session?.user?.id}
               onClick={() => handleDeleteClick(row.original)}
             >
               Delete

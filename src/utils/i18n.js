@@ -10,7 +10,7 @@ export const isUrlMissingLocale = url => {
 }
 
 // Get the localized url
-export const getLocalizedUrl = (url, languageCode) => {
+export const getLocalizedUrl = (url, languageCode = 'en') => {
   if (!url || !languageCode) throw new Error("URL or Language Code can't be empty")
 
   return isUrlMissingLocale(url) ? `/${languageCode}${ensurePrefix(url, '/')}` : url

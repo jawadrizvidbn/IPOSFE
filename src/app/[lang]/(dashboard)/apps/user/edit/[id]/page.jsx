@@ -46,12 +46,14 @@ const schema = object({
   serverUser: string([minLength(1, 'This field is required')]),
   serverPassword: string([minLength(1, 'This field is required')]),
   allowedStores: array(string()),
-  gracePeriod: string([minLength(1, 'This field is required')])
+  gracePeriod: string([minLength(1, 'This field is required')]),
+  referenceNumber: string([minLength(11, 'Reference must be 3 letters + 8 digits')])
 })
 
 const EditUser = ({ params }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isServerPasswordShown, setIsServerPasswordShown] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   // Redux
@@ -86,7 +88,8 @@ const EditUser = ({ params }) => {
       serverUser: '',
       serverPassword: '',
       allowedStores: [],
-      gracePeriod: ''
+      gracePeriod: '',
+      referenceNumber: ''
     }
   })
 
@@ -110,7 +113,8 @@ const EditUser = ({ params }) => {
           serverUser: userData.serverUser,
           serverPassword: userData.serverPassword,
           allowedStores: userData.allowedStores || [],
-          gracePeriod: userData.gracePeriod ? String(userData.gracePeriod) : ''
+          gracePeriod: userData.gracePeriod ? String(userData.gracePeriod) : '',
+          referenceNumber: userData.referenceNumber || ''
         })
 
         // Connect to server automatically
@@ -143,6 +147,8 @@ const EditUser = ({ params }) => {
   }, [dispatch, params.id, reset])
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleClickShowServerPassword = () => setIsServerPasswordShown(show => !show)
 
   const handleConnectServer = async () => {
     const { serverHost, serverUser, serverPassword } = getValues()
@@ -233,7 +239,7 @@ const EditUser = ({ params }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <Controller
                     name='password'
                     control={control}
@@ -264,6 +270,28 @@ const EditUser = ({ params }) => {
                         }}
                         InputLabelProps={{ shrink: true }}
                         autoComplete='new-password'
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='referenceNumber'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Reference Number'
+                        placeholder='ABC12345678'
+                        inputProps={{ maxLength: 11, style: { textTransform: 'uppercase' } }}
+                        value={field.value?.toUpperCase() || ''}
+                        onChange={e => field.onChange(e.target.value.toUpperCase())}
+                        error={!!errors.referenceNumber}
+                        helperText={errors.referenceNumber?.message}
+                        InputLabelProps={{ shrink: true }}
+                        disabled={true}
                       />
                     )}
                   />
@@ -318,11 +346,25 @@ const EditUser = ({ params }) => {
                         {...field}
                         fullWidth
                         label='Server Password'
-                        type='password'
+                        type={isServerPasswordShown ? 'text' : 'password'}
                         variant='outlined'
                         InputLabelProps={{ shrink: true }}
                         error={!!errors.serverPassword}
                         helperText={errors.serverPassword?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                onClick={handleClickShowServerPassword}
+                                onMouseDown={e => e.preventDefault()}
+                                aria-label='toggle server password visibility'
+                                edge='end'
+                              >
+                                <i className={isServerPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
                       />
                     )}
                   />
