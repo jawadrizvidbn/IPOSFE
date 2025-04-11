@@ -44,6 +44,7 @@ const schema = object({
   planEndDate: string([minLength(1, 'This field is required')]),
   serverHost: string([minLength(1, 'This field is required')]),
   serverUser: string([minLength(1, 'This field is required')]),
+  serverPort: string([minLength(1, 'This field is required')]),
   serverPassword: string([minLength(1, 'This field is required')]),
   allowedStores: array(string()),
   gracePeriod: string([minLength(1, 'This field is required')]),
@@ -86,6 +87,7 @@ const EditUser = ({ params }) => {
       planEndDate: '',
       serverHost: '',
       serverUser: '',
+      serverPort: '',
       serverPassword: '',
       allowedStores: [],
       gracePeriod: '',
@@ -111,6 +113,7 @@ const EditUser = ({ params }) => {
           planEndDate: userData.planEndDate,
           serverHost: userData.serverHost,
           serverUser: userData.serverUser,
+          serverPort: userData.serverPort,
           serverPassword: userData.serverPassword,
           allowedStores: userData.allowedStores || [],
           gracePeriod: userData.gracePeriod ? String(userData.gracePeriod) : '',
@@ -123,7 +126,8 @@ const EditUser = ({ params }) => {
             connectNewServer({
               host: userData.serverHost,
               user: userData.serverUser,
-              password: userData.serverPassword
+              password: userData.serverPassword,
+              port: userData?.serverPort || '3306'
             })
           )
         }
@@ -151,7 +155,7 @@ const EditUser = ({ params }) => {
   const handleClickShowServerPassword = () => setIsServerPasswordShown(show => !show)
 
   const handleConnectServer = async () => {
-    const { serverHost, serverUser, serverPassword } = getValues()
+    const { serverHost, serverUser, serverPassword, serverPort } = getValues()
 
     if (!serverHost || !serverUser || !serverPassword) {
       toast.error('Please fill all server connection fields')
@@ -162,7 +166,8 @@ const EditUser = ({ params }) => {
       connectNewServer({
         host: serverHost,
         user: serverUser,
-        password: serverPassword
+        password: serverPassword,
+        port: serverPort || '3306'
       })
     )
   }
@@ -332,6 +337,24 @@ const EditUser = ({ params }) => {
                         InputLabelProps={{ shrink: true }}
                         error={!!errors.serverUser}
                         helperText={errors.serverUser?.message}
+                        autoComplete='off'
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name='serverPort'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Server Port'
+                        variant='outlined'
+                        InputLabelProps={{ shrink: true }}
+                        error={!!errors.serverPort}
+                        helperText={errors.serverPort?.message}
                         autoComplete='off'
                       />
                     )}

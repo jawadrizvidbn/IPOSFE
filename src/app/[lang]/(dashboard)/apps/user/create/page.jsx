@@ -46,6 +46,7 @@ const schema = object({
   planEndDate: string([minLength(1, 'This field is required')]),
   serverHost: string([minLength(1, 'This field is required')]),
   serverUser: string([minLength(1, 'This field is required')]),
+  serverPort: string([minLength(1, 'This field is required')]),
   serverPassword: string([minLength(1, 'This field is required')]),
   allowedStores: array(string()),
   gracePeriod: string([minLength(1, 'This field is required')]),
@@ -87,6 +88,7 @@ const CreateUser = () => {
       planEndDate: '',
       serverHost: '',
       serverUser: '',
+      serverPort: '',
       serverPassword: '',
       allowedStores: [],
       gracePeriod: 0,
@@ -129,9 +131,9 @@ const CreateUser = () => {
   const handleClickShowServerPassword = () => setIsServerPasswordShown(show => !show)
 
   const handleConnectServer = async () => {
-    const { serverHost, serverUser, serverPassword } = getValues()
+    const { serverHost, serverUser, serverPassword, serverPort } = getValues()
 
-    if (!serverHost || !serverUser || !serverPassword) {
+    if (!serverHost || !serverUser || !serverPassword || !serverPort) {
       toast.error('Please fill all server connection fields')
       return
     }
@@ -140,6 +142,7 @@ const CreateUser = () => {
       connectNewServer({
         host: serverHost,
         user: serverUser,
+        port: serverPort,
         password: serverPassword
       })
     )
@@ -331,6 +334,23 @@ const CreateUser = () => {
                         InputLabelProps={{ shrink: true }}
                         error={!!errors.serverUser}
                         helperText={errors.serverUser?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name='serverPort'
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label='Server Port'
+                        variant='outlined'
+                        InputLabelProps={{ shrink: true }}
+                        error={!!errors.serverPort}
+                        helperText={errors.serverPort?.message}
                       />
                     )}
                   />
