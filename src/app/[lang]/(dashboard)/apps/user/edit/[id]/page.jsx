@@ -33,6 +33,7 @@ import { thunkStatus } from '@/utils/statusHandler'
 import { getAllPlans } from '@/redux/reducers/planSlice'
 import { getAllPermissions } from '@/redux/reducers/permissionSlice'
 import { updateUser, getUserById } from '@/redux/reducers/authSlice'
+import { ROLE_TYPES } from '@/utils/contants'
 
 const schema = object({
   name: string([minLength(3, 'Name must be at least 3 characters long')]),
@@ -48,7 +49,8 @@ const schema = object({
   serverPassword: string([minLength(1, 'This field is required')]),
   allowedStores: array(string()),
   gracePeriod: string([minLength(1, 'This field is required')]),
-  referenceNumber: string([minLength(11, 'Reference must be 3 letters + 8 digits')])
+  referenceNumber: string([minLength(11, 'Reference must be 3 letters + 8 digits')]),
+  role: string([minLength(1, 'This field is required')])
 })
 
 const EditUser = ({ params }) => {
@@ -56,6 +58,7 @@ const EditUser = ({ params }) => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [isServerPasswordShown, setIsServerPasswordShown] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedRole, setSelectedRole] = useState('')
 
   // Redux
   const dispatch = useDispatch()
@@ -91,7 +94,8 @@ const EditUser = ({ params }) => {
       serverPassword: '',
       allowedStores: [],
       gracePeriod: '',
-      referenceNumber: ''
+      referenceNumber: '',
+      role: ''
     }
   })
 
@@ -117,8 +121,10 @@ const EditUser = ({ params }) => {
           serverPassword: userData.serverPassword,
           allowedStores: userData.allowedStores || [],
           gracePeriod: userData.gracePeriod ? String(userData.gracePeriod) : '',
-          referenceNumber: userData.referenceNumber || ''
+          referenceNumber: userData.referenceNumber || '',
+          role: userData.role || ''
         })
+        setSelectedRole(userData.role || '')
 
         // Connect to server automatically
         if (userData.serverHost && userData.serverUser && userData.serverPassword) {
@@ -533,34 +539,68 @@ const EditUser = ({ params }) => {
                   <CardHeader title='Permission Details' sx={{ px: 0, pt: 3, pb: 0 }} />
                 </Grid>
 
+                {selectedRole !== ROLE_TYPES.USER && (
+                  <Grid item xs={12} sm={6}>
+                    <Controller
+                      name='permissions'
+                      control={control}
+                      rules={{ required: false }}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id='permission-select-label'>Permission</InputLabel>
+                          <Select
+                            labelId='permission-select-label'
+                            fullWidth
+                            multiple
+                            label='Permission'
+                            disabled={getAllPlansLoading}
+                            value={field.value}
+                            onChange={e => field.onChange(e.target.value)}
+                            error={!!errors.permissions}
+                            helperText={errors.permissions?.message}
+                          >
+                            {permissions && permissions.length > 0 ? (
+                              permissions.map(permission => (
+                                <MenuItem key={permission?.id} value={permission?.name}>
+                                  {permission?.name}
+                                </MenuItem>
+                              ))
+                            ) : (
+                              <MenuItem disabled>No permissions available</MenuItem>
+                            )}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  </Grid>
+                )}
+
                 <Grid item xs={12} sm={6}>
                   <Controller
-                    name='permissions'
+                    name='role'
                     control={control}
                     rules={{ required: false }}
                     render={({ field }) => (
                       <FormControl fullWidth>
-                        <InputLabel id='permission-select-label'>Permission</InputLabel>
+                        <InputLabel id='role-select-label'>Role</InputLabel>
                         <Select
-                          labelId='permission-select-label'
+                          labelId='role-select-label'
                           fullWidth
-                          multiple
-                          label='Permission'
+                          label='Role'
                           disabled={getAllPlansLoading}
                           value={field.value}
-                          onChange={e => field.onChange(e.target.value)}
-                          error={!!errors.permissions}
-                          helperText={errors.permissions?.message}
+                          onChange={e => {
+                            field.onChange(e.target.value)
+                            setSelectedRole(e.target.value)
+                          }}
+                          error={!!errors.role}
+                          helperText={errors.role?.message}
                         >
-                          {permissions && permissions.length > 0 ? (
-                            permissions.map(permission => (
-                              <MenuItem key={permission?.id} value={permission?.name}>
-                                {permission?.name}
-                              </MenuItem>
-                            ))
-                          ) : (
-                            <MenuItem disabled>No permissions available</MenuItem>
-                          )}
+                          {Object.values(ROLE_TYPES).map(role => (
+                            <MenuItem key={role} value={role}>
+                              {role}
+                            </MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     )}

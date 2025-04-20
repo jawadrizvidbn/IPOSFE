@@ -23,6 +23,12 @@ const verticalMenuData = (dictionary, params) => [
     ]
   },
 
+  {
+    label: dictionary['navigation'].dashboard,
+    href: '/dashboards/crm',
+    icon: 'ri-home-smile-line'
+  },
+
   // This is how you will normally render menu section
   {
     label: dictionary['navigation'].appsPages,

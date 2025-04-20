@@ -1,6 +1,7 @@
 {
     "navigation": {
         "dashboards": "لوحات القيادة",
+        "dashboard": "لوحة القيادة",
         "crm": "إدارة علاقات العملاء",
         "analytics": "تحليلات",
         "eCommerce": "التجارة الإلكترونية",

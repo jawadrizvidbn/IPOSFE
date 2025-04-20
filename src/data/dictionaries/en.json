@@ -1,6 +1,7 @@
 {
     "navigation": {
         "dashboards": "Dashboards",
+        "dashboard": "Dashboard",
         "crm": "CRM",
         "analytics": "Analytics",
         "eCommerce": "eCommerce",
