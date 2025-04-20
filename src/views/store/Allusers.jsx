@@ -41,6 +41,8 @@ import tableStyles from '@core/styles/table.module.css'
 import { deleteUser } from '@/redux/reducers/authSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 import { useSession } from 'next-auth/react'
+import { checkPermission } from '@/utils'
+import { PERMISSIONS } from '@/utils/contants'
 
 const columnHelper = createColumnHelper()
 
@@ -82,6 +84,8 @@ const AllUsers = ({ users = [] }) => {
     pageIndex: 0,
     pageSize: 10
   })
+
+  const user = useSelector(state => state.auth.user)
 
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -147,26 +151,30 @@ const AllUsers = ({ users = [] }) => {
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex gap-2'>
-            <Link
-              href={{
-                pathname: `/${locale}/apps/user/edit/${row.original.id}`
-              }}
-              passHref
-            >
-              <Button variant='outlined' size='small' color='primary' className='mr-2'>
-                Edit
+            {checkPermission(PERMISSIONS.EDIT_USER, user) && (
+              <Link
+                href={{
+                  pathname: `/${locale}/apps/user/edit/${row.original.id}`
+                }}
+                passHref
+              >
+                <Button variant='outlined' size='small' color='primary' className='mr-2'>
+                  Edit
+                </Button>
+              </Link>
+            )}
+            {checkPermission(PERMISSIONS.DELETE_USER, user) && (
+              <Button
+                variant='outlined'
+                size='small'
+                color='error'
+                className='mr-2'
+                disabled={row.original.id === session?.user?.id}
+                onClick={() => handleDeleteClick(row.original)}
+              >
+                Delete
               </Button>
-            </Link>
-            <Button
-              variant='outlined'
-              size='small'
-              color='error'
-              className='mr-2'
-              disabled={row.original.id === session?.user?.id}
-              onClick={() => handleDeleteClick(row.original)}
-            >
-              Delete
-            </Button>
+            )}
           </div>
         ),
         enableSorting: false

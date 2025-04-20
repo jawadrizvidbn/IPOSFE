@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import userService from '../../services/userService'
-import { signIn } from 'next-auth/react'
+import { getSession, signIn } from 'next-auth/react'
 import { thunkStatus } from '@/utils/statusHandler'
 import { toast } from 'react-toastify'
 
@@ -16,7 +16,8 @@ export const loginUser = createAsyncThunk(`${name}/loginUser`, async (data, { re
     })
 
     if (res.ok && !res.error) {
-      return data
+      const session = await getSession()
+      return session.user || data || {}
     }
 
     return rejectWithValue(res.error)
@@ -79,6 +80,9 @@ const authSlice = createSlice({
     },
     setList: (state, action) => {
       state.list = action.payload
+    },
+    setCurrentUser: (state, action) => {
+      state.user = action.payload
     }
   },
   extraReducers: builder => {
@@ -99,6 +103,6 @@ const authSlice = createSlice({
   }
 })
 
-export const { logout, setList } = authSlice.actions
+export const { logout, setList, setCurrentUser } = authSlice.actions
 
 export default authSlice.reducer
