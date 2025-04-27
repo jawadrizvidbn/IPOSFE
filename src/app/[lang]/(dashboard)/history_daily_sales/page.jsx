@@ -8,13 +8,11 @@ import Daily_sales from '@/views/store/Daily_sales'
 
 // Component imports
 
-
 const Tables = () => {
   return (
     <Grid container spacing={6}>
-
-<Grid item xs={12}>
-        <Daily_sales/>
+      <Grid item xs={12}>
+        <Daily_sales />
       </Grid>
     </Grid>
   )

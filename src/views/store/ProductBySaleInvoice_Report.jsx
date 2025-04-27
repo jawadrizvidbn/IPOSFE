@@ -60,6 +60,7 @@ const ProductBySaleInvoice_Report = () => {
   const [originalData, setOriginalData] = useState([])
   const [allOverTotal, setAllOverTotal] = useState()
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -73,15 +74,15 @@ const ProductBySaleInvoice_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -96,23 +97,22 @@ const ProductBySaleInvoice_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const fetchData = async () => {
     setLoading(true)
     setIsFetching(true)
 
     try {
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}`
+      const token = `Bearer ${session.user.token}`
       const config = { headers: { Authorization: token } }
-      const tableNames = id
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/HistoryProductSaleByInvoiceReport?tableName=${id}`
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/HistoryProductSaleByInvoiceReport?tableName=${id}&shopKey=${shopKey}`
 
       console.log('API URL:', apiUrl)
 
@@ -246,7 +246,7 @@ const ProductBySaleInvoice_Report = () => {
   useEffect(() => {
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session])
+  }, [session?.user?.token, shopKey])
   useEffect(() => {
     const filtered = originalData.filter(item => {
       const itemDate = new Date(item.datetime)

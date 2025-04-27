@@ -5,14 +5,7 @@ import exampleReducer from './exampleReducer'
 import authReducer from './authSlice'
 import shopKeyReducer from './shopKeySlice'
 import stockOnHandReducer from './stockOnHandSlice'
-
-const rootReducer = combineReducers({
-  example: exampleReducer,
-  auth: authReducer,
-  shopKey: shopKeyReducer,
-  stockOnHand: stockOnHandReducer
-
-  // Add other reducers here
-})
+import planReducer from './planSlice'
+import databaseReducer from './databaseSlice'
 
 export default rootReducer

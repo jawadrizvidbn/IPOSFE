@@ -63,18 +63,20 @@ const PerviousDebtorsStatement_Report = () => {
   const [selectedPreviousDate, setSelectedPreviousDate] = useState('')
   const [selectedCurrentDate, setSelectedCurrentDate] = useState('')
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -89,19 +91,20 @@ const PerviousDebtorsStatement_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const GetPerivousDebortsDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousDeborsDetails`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousDeborsDetails?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -112,7 +115,7 @@ const PerviousDebtorsStatement_Report = () => {
     }
 
     GetPerivousDebortsDetails()
-  }, [session, selectedDebtorType])
+  }, [session?.user?.token, shopKey, selectedDebtorType])
 
   const formatDate = dateString => {
     const date = new Date(dateString) // Convert string to date
@@ -134,13 +137,13 @@ const PerviousDebtorsStatement_Report = () => {
       setClickedButtons({}) // Clear clicked button states
 
       // Ensure session and user data is available
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Authorization token
+      const token = `Bearer ${session.user.token}` // Authorization token
       const config = { headers: { Authorization: token } }
 
       // Determine debtor type based on selectedDebtorType
@@ -148,7 +151,7 @@ const PerviousDebtorsStatement_Report = () => {
       // Construct the API URL dynamically
       const apiUrl = `${
         process.env.NEXT_PUBLIC_API_URL
-      }/database/PreviousDebtorsStatementReport?cmbCode=${selectedDebtor}${
+      }/database/PreviousDebtorsStatementReport?cmbCode=${selectedDebtor}&shopKey=${shopKey}${
         selectedPreviousDate ? `&startDate=${selectedPreviousDate}` : ''
       }${selectedCurrentDate ? `&endDate=${selectedCurrentDate}` : ''}`
 

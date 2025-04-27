@@ -25,7 +25,7 @@ const BasicDataTables = () => {
     const fetchShops = async () => {
       try {
         if (!session) return // Ensure session is defined before fetching
-        const Token = session?.user?.id
+        const Token = session?.user?.token
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/getallshop`, {
           headers: {
@@ -74,7 +74,7 @@ const BasicDataTables = () => {
       }
 
       dispatch(setShopKey(shopKey))
-      router.push('/reports')
+      router.push(`/reports?shopKey=${shopKey}`)
       console.log(`Dispatched shopKey: ${shopKey}`)
     } catch (error) {
       if (error.response.status === 401) {

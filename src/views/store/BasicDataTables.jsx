@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useDispatch, useSelector } from 'react-redux'
 import Card from '@mui/material/Card'
@@ -14,15 +14,17 @@ import { getLocalizedUrl } from '@/utils/i18n'
 const BasicDataTables = () => {
   const [loading, setLoading] = useState(true)
   const [shopKeys, setShopKeys] = useState([])
+  const [shopLoading, setShopLoading] = useState(false)
   const router = useRouter()
+  const search = useSearchParams()
   const dispatch = useDispatch()
   const currentShopKey = useSelector(state => state.shopKey)
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
 
   // Fetch shops based on user session
   const fetchShops = useCallback(async () => {
     if (!session) return // Ensure session is defined before fetching
-    const token = session.user.id
+    const token = session?.user?.token
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/getallshop`, {
@@ -48,22 +50,21 @@ const BasicDataTables = () => {
     } finally {
       setLoading(false) // Set loading to false once data is fetched
     }
-  }, [session, router])
+  }, [session, router, sessionStatus])
 
   // Effect to fetch shops when session is available
   useEffect(() => {
-    if (session) {
-      fetchShops()
-    }
-  }, [session, fetchShops])
+    if (sessionStatus === 'authenticated') fetchShops()
+  }, [sessionStatus])
 
   // Handle shop selection
   const handleShopClick = async shopKey => {
     if (!session) return
 
-    const token = session.user.id
+    const token = session.user.token
 
     try {
+      setShopLoading(shopKey)
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/activedatabase/${shopKey}`, {
         method: 'GET',
         headers: {
@@ -74,7 +75,12 @@ const BasicDataTables = () => {
       if (!response.ok) throw new Error('Error activating shop')
 
       dispatch(setShopKey(shopKey))
-      router.push('/reports')
+      const query = new URLSearchParams()
+      query.set('shopKey', shopKey)
+
+      const url = getLocalizedUrl(`/reports?${query.toString()}`, 'en')
+      router.push(url)
+      console.log(`Dispatched shopKey: ${shopKey}`)
     } catch (error) {
       if (error.response && error.response.status === 401) {
         signOut({ redirect: false })
@@ -82,6 +88,8 @@ const BasicDataTables = () => {
       } else {
         console.error('Error activating shop:', error)
       }
+    } finally {
+      setShopLoading(false)
     }
   }
 
@@ -116,10 +124,11 @@ const BasicDataTables = () => {
             return (
               <button
                 key={index}
+                disabled={shopLoading}
                 onClick={() => handleShopClick(shopKey)}
                 className='w-full h-14 text-xl text-orange-600 border border-orange-600 py-2 px-4 rounded-full hover:bg-orange-600 hover:text-white transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg animate-button'
               >
-                {formattedShopKey}
+                {shopLoading === shopKey ? 'Loading...' : formattedShopKey}
               </button>
             )
           })

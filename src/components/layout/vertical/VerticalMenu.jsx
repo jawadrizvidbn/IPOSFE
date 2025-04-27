@@ -2,6 +2,7 @@
 
 // Next Imports
 import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
@@ -24,6 +25,9 @@ import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNav
 // Style Imports
 import menuItemStyles from '@core/styles/vertical/menuItemStyles'
 import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
+import { PERMISSIONS, ROLE_TYPES } from '@/utils/contants'
+import { checkPermission } from '@/utils/'
+import { useSelector } from 'react-redux'
 
 const RenderExpandIcon = ({ open, transitionDuration }) => (
   <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
@@ -36,6 +40,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
   const params = useParams()
+  const { data: session } = useSession()
   const { isBreakpointReached } = useVerticalNav()
   const { settings } = useSettings()
 
@@ -44,6 +49,10 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
   const { lang: locale, id } = params
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
+  const user = useSelector(state => state.auth.user)
+
+  // console.log('user via redux: ', user)
+  const isUserRole = user?.role === ROLE_TYPES.USER
   return (
     // eslint-disable-next-line lines-around-comment
     /* Custom scrollbar instead of browser scroll, remove if you want browser scroll only */
@@ -67,7 +76,11 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
         renderExpandedMenuItemIcon={{ icon: <i className='ri-circle-line' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <SubMenu
+        <MenuItem href={`/${locale}/dashboards/crm`} icon={<i className='ri-home-smile-line' />}>
+          {dictionary['navigation'].dashboard}
+        </MenuItem>
+
+        {/* <SubMenu
           label={dictionary['navigation'].dashboards}
           icon={<i className='ri-home-smile-line' />}
           suffix={<Chip label='3' size='small' color='error' />}
@@ -75,12 +88,35 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           <MenuItem href={`/${locale}/dashboards/crm`}>{dictionary['navigation'].crm}</MenuItem>
           <MenuItem href={`/${locale}/dashboards/analytics`}>{dictionary['navigation'].analytics}</MenuItem>
           <MenuItem href={`/${locale}/dashboards/ecommerce`}>{dictionary['navigation'].eCommerce}</MenuItem>
-        </SubMenu>
+        </SubMenu> */}
 
-        <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
-          <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
-          <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].register}</MenuItem>
-        </SubMenu>
+        {Boolean(
+          checkPermission(PERMISSIONS.CREATE_USER, user) ||
+            checkPermission(PERMISSIONS.EDIT_USER, user) ||
+            checkPermission(PERMISSIONS.DELETE_USER, user)
+        ) &&
+          !isUserRole && (
+            <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
+              <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
+              {checkPermission(PERMISSIONS.CREATE_USER, user) && (
+                <MenuItem href={`/${locale}/apps/user/create`}>{dictionary['navigation'].create}</MenuItem>
+              )}
+            </SubMenu>
+          )}
+
+        {!isUserRole && (
+          <SubMenu label={dictionary['navigation'].plans} icon={<i className='ri-user-line' />}>
+            <MenuItem href={`/${locale}/apps/plan/list`}>{dictionary['navigation'].list}</MenuItem>
+            <MenuItem href={`/${locale}/apps/plan/create`}>{dictionary['navigation'].create}</MenuItem>
+          </SubMenu>
+        )}
+
+        {session?.user?.role === ROLE_TYPES.SUPER_ADMIN && !isUserRole && (
+          <SubMenu label={dictionary['navigation'].permissions} icon={<i className='ri-user-line' />}>
+            <MenuItem href={`/${locale}/apps/permission/list`}>{dictionary['navigation'].list}</MenuItem>
+            <MenuItem href={`/${locale}/apps/permission/create`}>{dictionary['navigation'].create}</MenuItem>
+          </SubMenu>
+        )}
 
         <MenuItem href={`/${locale}/store`} icon={<i className='ri-table-alt-line' />}>
           {dictionary['navigation'].store}

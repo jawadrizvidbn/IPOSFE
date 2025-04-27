@@ -55,6 +55,8 @@ const CurrentCreditorsAgeAnalysis_Report = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterGreaterThanZero, setFilterGreaterThanZero] = useState(false)
 
+  const shopKey = searchParams.get('shopKey')
+
   const handleToggleChange = () => {
     setFilterGreaterThanZero(prev => !prev)
   }
@@ -62,15 +64,15 @@ const CurrentCreditorsAgeAnalysis_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -85,18 +87,18 @@ const CurrentCreditorsAgeAnalysis_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+        const token = `Bearer ${session.user.token}` // Ensure this is the correct token
 
         const config = {
           headers: { Authorization: token },
@@ -105,7 +107,7 @@ const CurrentCreditorsAgeAnalysis_Report = () => {
           }
         }
 
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CURRENTCreditorsAgeAnalysisReport`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CURRENTCreditorsAgeAnalysisReport?shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
@@ -261,7 +263,7 @@ const CurrentCreditorsAgeAnalysis_Report = () => {
     }
 
     fetchData()
-  }, [session, id, router, filterGreaterThanZero])
+  }, [session?.user?.token, id, router, filterGreaterThanZero, shopKey])
 
   // Filter data based on search term
   useEffect(() => {

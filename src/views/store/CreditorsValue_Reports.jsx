@@ -53,6 +53,7 @@ const CreditorsValue_Report = () => {
   const [grandTotal, setGrandTotal] = useState(null) // State for grand total
   const [sorting, setSorting] = useState([]) // State for sorting
   const [searchTerm, setSearchTerm] = useState('')
+  const shopKey = searchParams.get('shopKey')
 
   useEffect(() => {
     if (startDateFromURL) {
@@ -66,15 +67,15 @@ const CreditorsValue_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -89,20 +90,20 @@ const CreditorsValue_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+        const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CreditorsValueReports`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CreditorsValueReports?shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
@@ -285,7 +286,7 @@ const CreditorsValue_Report = () => {
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, id, router, shopKey])
 
   useEffect(() => {
     const filtered = data?.filter(item => {

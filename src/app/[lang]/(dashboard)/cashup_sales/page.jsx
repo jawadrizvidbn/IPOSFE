@@ -8,13 +8,11 @@ import Cashup_sales from '@/views/store/Cashup_Report.jsx'
 
 // Component imports
 
-
 const Tables = () => {
   return (
     <Grid container spacing={6}>
-
-<Grid item xs={12}>
-        <Cashup_sales/>
+      <Grid item xs={12}>
+        <Cashup_sales />
       </Grid>
     </Grid>
   )

@@ -74,8 +74,8 @@ const Login = ({ mode }) => {
   } = useForm({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@gmail.com',
-      password: 'admin'
+      email: '',
+      password: ''
     }
   })
 
@@ -133,12 +133,6 @@ const Login = ({ mode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}!👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
-            <Typography variant='body2' color='primary'>
-              Email: <span className='font-medium'>admin@gmail.com</span> / Pass:{' '}
-              <span className='font-medium'>admin</span>
-            </Typography>
-          </Alert>
 
           <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
             <Controller

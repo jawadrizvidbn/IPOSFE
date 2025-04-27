@@ -40,4 +40,7 @@ next-env.d.ts
 /static
 /server
 
+.next
 
+.env
+.env.*

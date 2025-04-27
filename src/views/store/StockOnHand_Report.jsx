@@ -63,6 +63,8 @@ const StockOnHand_Report = () => {
   const [selectedSub2No, setSelectedSub2No] = useState('')
   const [hiddenProducts, setHiddenProducts] = useState(false)
 
+  const searchParams = useSearchParams()
+  const shopKey = searchParams.get('shopKey')
   const [settings, setSettings] = useState({
     includeNegativeStockonHand: false,
     includeNegativeLastCostPrice: false,
@@ -82,15 +84,15 @@ const StockOnHand_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -105,13 +107,14 @@ const StockOnHand_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const fetchDepartmentsAndCategories = async () => {
       try {
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allDepartmentWithCategories?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -122,7 +125,7 @@ const StockOnHand_Report = () => {
     }
 
     fetchDepartmentsAndCategories()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const handleDepartmentChange = e => {
     const value = e.target.value
@@ -210,13 +213,13 @@ const StockOnHand_Report = () => {
     setIsFetching(true)
 
     try {
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}`
+      const token = `Bearer ${session.user.token}`
       const config = { headers: { Authorization: token } }
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/allTblDataProducts?majorNo=${selectedMajorNo}&sub1No=${selectedSub1No}&sub2No=${selectedSub2No}&includeNegativeStockonHand=${settings.includeNegativeStockonHand}&includeNegativeLastCostPrice=${settings.includeNegativeLastCostPrice}&includeNegativeAvarageCostPrice=${settings.includeNegativeAvarageCostPrice}&includeZeroStockonHand=${ZeroSettings.includeZeroStockonHand}&includeZeroLastCostPrice=${ZeroSettings.includeZeroLastCostPrice}&includeZeroAvarageCostPrice=${ZeroSettings.includeZeroAvarageCostPrice}&includeOnlyPositiveStock=${NegativeandZeroStock.includeOnlyPositiveStock}`
 
@@ -373,8 +376,6 @@ const StockOnHand_Report = () => {
     if (
       settings.includeNegativeAvarageCostPrice ||
       settings.includeNegativeLastCostPrice ||
-
-      
       settings.includeNegativeStockonHand
     )
       fetchData()
@@ -385,7 +386,6 @@ const StockOnHand_Report = () => {
     if (
       ZeroSettings.includeZeroAvarageCostPrice ||
       ZeroSettings.includeZeroLastCostPrice ||
-
       // ZeroSettings.includeZeroLaybyeStock ||
       ZeroSettings.includeZeroStockonHand
     )
@@ -416,7 +416,7 @@ const StockOnHand_Report = () => {
       // Call fetchData API when includeOnlyPositiveStock becomes true
       fetchData()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [NegativeandZeroStock.includeOnlyPositiveStock]) // This will run when includeOnlyPositiveStock changes
 
   const handleButtonClick = columnId => {

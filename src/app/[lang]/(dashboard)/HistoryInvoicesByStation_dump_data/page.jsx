@@ -8,12 +8,10 @@ import AllHistoryInvoicesByStationTablesRecord from '@views/store/HistoryInvoice
 
 // Component imports
 
-
 const Tables = () => {
   return (
     <Grid container spacing={6}>
-
-<Grid item xs={12}>
+      <Grid item xs={12}>
         <AllHistoryInvoicesByStationTablesRecord />
       </Grid>
     </Grid>

@@ -59,6 +59,7 @@ const PerviousDebtorsAgeAnalysis_Report = () => {
   const [selectedCurrentAgedate, setSelectedCurrentAgedate] = useState('')
   const [checkBalance, setCheckBalance] = useState(false)
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -71,15 +72,15 @@ const PerviousDebtorsAgeAnalysis_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -94,21 +95,21 @@ const PerviousDebtorsAgeAnalysis_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const GetAllPERVIOUSDebtorsAgeAnalysisGroupsAndPreviousAging = async () => {
       try {
         // Check if session data is available
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+        const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPERVIOUSDebtorsAgeAnalysisGroupsAndPreviousAging`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPERVIOUSDebtorsAgeAnalysisGroupsAndPreviousAging?shopKey=${shopKey}`
 
         // Fetch data from the API
         const response = await axios.get(apiUrl, config)
@@ -132,7 +133,7 @@ const PerviousDebtorsAgeAnalysis_Report = () => {
     }
 
     GetAllPERVIOUSDebtorsAgeAnalysisGroupsAndPreviousAging() // Call the function
-  }, [session, router])
+  }, [session?.user?.token, router, shopKey])
 
   const handleFetchData = async () => {
     if (!selectedACCTERM || !selectedCurrentAgedate) return // Only fetch if both are selected
@@ -144,13 +145,13 @@ const PerviousDebtorsAgeAnalysis_Report = () => {
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+      const token = `Bearer ${session.user.token}` // Ensure this is the correct token
       const config = { headers: { Authorization: token } }
 
       // Convert selectedCurrentAgedate to the required format
       const formattedDate = new Date(selectedCurrentAgedate).toISOString().replace('T', ' ').substring(0, 19) // Format as YYYY-MM-DD HH:mm:ss
 
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/PERVIOUSDebtorsAgeAnalysisReport?debtorGroup=${selectedACCTERM}&previousAging=${formattedDate}&checkBalanceGreaterthanZero=${checkBalance}`
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/PERVIOUSDebtorsAgeAnalysisReport?debtorGroup=${selectedACCTERM}&previousAging=${formattedDate}&checkBalanceGreaterthanZero=${checkBalance}&shopKey=${shopKey}`
 
       // Validate API URL
       console.log('API URL:', apiUrl)

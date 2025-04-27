@@ -57,7 +57,7 @@ const AllusersUpdate = () => {
 
   const fetchShopsAndUserShops = async () => {
     try {
-      const token = session?.user?.id
+      const token = session?.user?.token
 
       if (!token) throw new Error('Token not available')
 

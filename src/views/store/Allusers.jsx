@@ -1,210 +1,324 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
-import { Card, CardHeader } from '@mui/material'
-import axios from 'axios'
-import { useSession, signOut } from 'next-auth/react'
-import { useReactTable, createColumnHelper, flexRender, getCoreRowModel } from '@tanstack/react-table'
-import { useSelector } from 'react-redux'
+import {
+  Card,
+  CardHeader,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  TablePagination,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress
+} from '@mui/material'
+import {
+  useReactTable,
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel
+} from '@tanstack/react-table'
+import { rankItem } from '@tanstack/match-sorter-utils'
+import classnames from 'classnames'
+
+// Style Imports
+import tableStyles from '@core/styles/table.module.css'
+
+// Redux imports
+import { deleteUser } from '@/redux/reducers/authSlice'
+import { thunkStatus } from '@/utils/statusHandler'
+import { useSession } from 'next-auth/react'
+import { checkPermission } from '@/utils'
+import { PERMISSIONS } from '@/utils/contants'
 
 const columnHelper = createColumnHelper()
 
-const columns = [
-  columnHelper.accessor('name', {
-    cell: info => info.row.original.name,
-    header: 'Name'
-  }),
-  columnHelper.accessor('email', {
-    cell: info => info.row.original.email,
-    header: 'Email'
-  })
-]
+// Fuzzy filter function for search
+const fuzzyFilter = (row, columnId, value, addMeta) => {
+  const itemRank = rankItem(row.getValue(columnId), value)
+  addMeta({ itemRank })
+  return itemRank.passed
+}
 
-const AllDataCashupSalesRecords = () => {
-  const [data, setData] = useState([])
-  const [filteredData, setFilteredData] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const { data: session } = useSession()
-  const router = useRouter()
-  const shopKey = useSelector(state => state.shopKey) // Fetch shopKey from Redux store
+// Debounced input component for search
+const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
+  const [value, setValue] = useState(initialValue)
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      setError(null)
+    setValue(initialValue)
+  }, [initialValue])
 
-      try {
-        if (!session || !session.user || !session.user.id) {
-          throw new Error('Session data not available')
-        }
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange(value)
+    }, debounce)
 
-        const token = `Bearer ${session.user.id}`
-        const config = { headers: { Authorization: token } }
+    return () => clearTimeout(timeout)
+  }, [value, onChange, debounce])
 
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/users`
+  return <TextField {...props} value={value} onChange={e => setValue(e.target.value)} size='small' />
+}
 
-        const response = await axios.get(apiUrl, {
-          headers: config.headers
-        })
+const AllUsers = ({ users = [] }) => {
+  const dispatch = useDispatch()
+  const isDeleting = useSelector(state => state.auth.deleteUserStatus === thunkStatus.LOADING)
+  const currentUser = useSelector(state => state.auth.user)
+  const { data: session, status } = useSession()
 
-        setData(response.data)
-        setFilteredData(response.data) // Initialize filtered data with the fetched data
-      } catch (error) {
-        console.error('Error fetching data:', error)
-        setError(error)
-
-        if (error.response && error.response.status === 401) {
-          // Clear session and redirect to login
-          await signOut({ redirect: false })
-          router.push('/login')
-        } else {
-          setError(error)
-        }
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [session, router])
-
-  const table = useReactTable({
-    data: searchTerm ? filteredData : data, // Use filteredData if searchTerm exists
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    filterFns: {
-      fuzzy: () => false
-    }
+  const [filteredData, setFilteredData] = useState([])
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10
   })
 
-  const handleSearchChange = event => {
-    const searchTerm = event.target.value
+  const user = useSelector(state => state.auth.user)
 
-    setSearchTerm(searchTerm)
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState(null)
 
-    // Filter data based on search term
-    const filtered = data.filter(
-      item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.email.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const router = useRouter()
+  const { lang: locale } = useParams()
 
-    setFilteredData(filtered)
+  // Initialize filtered data when users prop changes
+  useEffect(() => {
+    setFilteredData(users)
+  }, [users])
+
+  // Delete handlers
+  const handleDeleteClick = user => {
+    setUserToDelete(user)
+    setDeleteDialogOpen(true)
   }
 
+  const handleDeleteConfirm = () => {
+    if (userToDelete) {
+      dispatch(deleteUser(userToDelete.id))
+        .unwrap()
+        .then(() => {
+          setDeleteDialogOpen(false)
+          setUserToDelete(null)
+        })
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setUserToDelete(null)
+  }
+
+  // Define columns
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('name', {
+        header: 'Name',
+        cell: ({ row }) => (
+          <div className='flex flex-col'>
+            <Typography className='font-medium' color='text.primary'>
+              {row.original.name}
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              {row.original.email}
+            </Typography>
+          </div>
+        ),
+        enableSorting: true
+      }),
+      columnHelper.accessor('role', {
+        header: 'Role',
+        cell: ({ row }) => (
+          <Typography className='capitalize' color='text.primary'>
+            {row.original.role || 'User'}
+          </Typography>
+        ),
+        enableSorting: true
+      }),
+      columnHelper.accessor('action', {
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className='flex gap-2'>
+            {checkPermission(PERMISSIONS.EDIT_USER, user) && (
+              <Link
+                href={{
+                  pathname: `/${locale}/apps/user/edit/${row.original.id}`
+                }}
+                passHref
+              >
+                <Button variant='outlined' size='small' color='primary' className='mr-2'>
+                  Edit
+                </Button>
+              </Link>
+            )}
+            {checkPermission(PERMISSIONS.DELETE_USER, user) && (
+              <Button
+                variant='outlined'
+                size='small'
+                color='error'
+                className='mr-2'
+                disabled={row.original.id === session?.user?.id}
+                onClick={() => handleDeleteClick(row.original)}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+        ),
+        enableSorting: false
+      })
+    ],
+    [locale, handleDeleteClick]
+  )
+
+  // Initialize table
+  const table = useReactTable({
+    data: users,
+    columns,
+    filterFns: {
+      fuzzy: fuzzyFilter
+    },
+    state: {
+      globalFilter,
+      pagination
+    },
+    onPaginationChange: setPagination,
+    globalFilterFn: fuzzyFilter,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel()
+  })
+
   return (
-    <Card className='p-4'>
-      <CardHeader title={`All Users`} />
-
-      <div className='mb-4 flex justify-end'>
-        <input
-          type='text'
-          placeholder='Search...'
-          className='border border-gray-300 rounded-md px-2 py-2 h-10 focus:border-blue-500 focus:outline-none'
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </div>
-
-      {isLoading ? (
-        <div className='loading text-center py-4'>Loading data...</div>
-      ) : error ? (
-        <div className='error text-center text-red-500 py-4'>Error: {error.message}</div>
-      ) : (
-        <div className=''>
-          <table className='min-w-full divide-y divide-gray-200'>
-            <thead className='bg-gray-50'>
+    <>
+      <Card>
+        <CardHeader title='All Users' />
+        <Divider />
+        <div className='flex justify-between p-5 gap-4 flex-col items-start sm:flex-row sm:items-center'>
+          <Button
+            color='secondary'
+            variant='outlined'
+            startIcon={<i className='ri-upload-2-line text-xl' />}
+            className='is-full sm:is-auto'
+          >
+            Export
+          </Button>
+          <DebouncedInput
+            value={globalFilter ?? ''}
+            onChange={value => setGlobalFilter(String(value))}
+            placeholder='Search Users'
+            className='is-full sm:is-auto'
+          />
+        </div>
+        <div className='overflow-x-auto'>
+          <table className={tableStyles.table}>
+            <thead>
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(
-                    header =>
-                      header.id !== 'email' && (
-                        <th
-                          key={header.id}
-                          className=' py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={classnames({
+                            'flex items-center': header.column.getIsSorted(),
+                            'cursor-pointer select-none': header.column.getCanSort()
+                          })}
+                          onClick={header.column.getToggleSortingHandler()}
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                        </th>
-                      )
-                  )}
-                  <th className=' py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Actions
-                  </th>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {{
+                            asc: <i className='ri-arrow-up-s-line text-xl' />,
+                            desc: <i className='ri-arrow-down-s-line text-xl' />
+                          }[header.column.getIsSorted()] ?? null}
+                        </div>
+                      )}
+                    </th>
+                  ))}
                 </tr>
               ))}
             </thead>
-
-            <tbody className='bg-white divide-y divide-gray-200'>
-              {table.getRowModel().rows.map((row, index) => (
-                <tr key={row.id} className='hover:bg-gray-100'>
-                  <td className=' py-4 whitespace-nowrap'>
-                    <span className='text-gray-500'>{index + 1}.</span>{' '}
-                    <Link href={{ pathname: '/en/apps/user/allusersupdate/', query: { id: row.original.id } }} passHref>
-                      <span className='cursor-pointer text-black hover:text-blue-700'>{row.original.name}</span>
-                    </Link>
-                    <br />
-                    <span className='text-gray-500'>{row.original.email}</span>
-                  </td>
-                  <td className=' py-4 whitespace-nowrap text-right text-sm font-medium'>
-                    <Link
-                      href={{
-                        pathname: '/en/apps/user/allusersupdate/',
-                        query: {
-                          user: JSON.stringify({
-                            id: row.original.id,
-                            name: row.original.name,
-                            email: row.original.email,
-                            role: row.original.role,
-                            image: row.original.image,
-                            plan:row.original.plan,
-                            planActive:row.original.planActive,
-                            planStartDate:row.original.planStartDate,
-                            planEndDate:row.original.planEndDate,
-                            // eslint-disable-next-line lines-around-comment
-                            // Add other fields you want to pass
-                          })
-                        }
-                      }}
-                      passHref
-                    >
-                      <p className='text-blue-600 hover:text-blue-900'>Edit</p>
-                    </Link>
-                    <Link
-                      href={{
-                        pathname: '/en/apps/user/user_permissions/',
-                        query: {
-                          user: JSON.stringify({
-                            id: row.original.id,
-                            name: row.original.name,
-                            email: row.original.email,
-                            role: row.original.role,
-                            image: row.original.image
-
-                            // Add other fields you want to pass
-                          })
-                        }
-                      }}
-                      passHref
-                    >
-                      <p className='text-blue-600 hover:text-blue-900'>Permission</p>
-                    </Link>
+            {table.getFilteredRowModel().rows.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    No data available
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              </tbody>
+            ) : (
+              <tbody>
+                {table.getRowModel().rows.map(row => {
+                  return (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      ))}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            )}
           </table>
         </div>
-      )}
-    </Card>
+        <TablePagination
+          component='div'
+          count={table.getFilteredRowModel().rows.length}
+          page={table.getState().pagination.pageIndex}
+          rowsPerPage={table.getState().pagination.pageSize}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page)
+          }}
+          onRowsPerPageChange={e => {
+            table.setPageSize(Number(e.target.value))
+          }}
+        />
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby='delete-dialog-title'
+        aria-describedby='delete-dialog-description'
+      >
+        <DialogTitle id='delete-dialog-title'>Delete User</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='delete-dialog-description'>
+            Are you sure you want to delete the user "{userToDelete?.name}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color='primary'>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color='error'
+            variant='contained'
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} color='inherit' /> : null}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   )
 }
 
-export default AllDataCashupSalesRecords
+export default AllUsers

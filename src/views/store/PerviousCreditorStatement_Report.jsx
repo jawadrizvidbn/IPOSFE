@@ -62,18 +62,20 @@ const PerviousCreditorStatement_Report = () => {
   const [selectedPreviousDate, setSelectedPreviousDate] = useState('')
   const [selectedCurrentDate, setSelectedCurrentDate] = useState('')
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -88,19 +90,20 @@ const PerviousCreditorStatement_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const GetPerivousDebortsDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousCreditorDetails`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllPerviousCreditorDetails?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -111,7 +114,7 @@ const PerviousCreditorStatement_Report = () => {
     }
 
     GetPerivousDebortsDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const formatDate = dateString => {
     const date = new Date(dateString) // Convert string to date
@@ -133,19 +136,19 @@ const PerviousCreditorStatement_Report = () => {
       setClickedButtons({}) // Clear clicked button states
 
       // Ensure session and user data is available
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Authorization token
+      const token = `Bearer ${session.user.token}` // Authorization token
       const config = { headers: { Authorization: token } }
 
       // Construct the API URL dynamically
       const apiUrl = `${
         process.env.NEXT_PUBLIC_API_URL
-      }/database/PreviousCreditorStatementReport?cmbCode=${selectedCreditor}${
+      }/database/PreviousCreditorStatementReport?cmbCode=${selectedCreditor}&shopKey=${shopKey}${
         selectedPreviousDate ? `&startDate=${selectedPreviousDate}` : ''
       }${selectedCurrentDate ? `&endDate=${selectedCurrentDate}` : ''}`
 

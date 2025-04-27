@@ -30,7 +30,6 @@ import phone from '../../../public/Assets/phone.png'
 const columnHelper = createColumnHelper()
 
 const DebtorsInvoiceReport = () => {
-
   const [columns, setColumns] = useState([])
   const [companyDetails, setCompanyDetails] = useState({})
   const containerRef = useRef(null)
@@ -54,6 +53,7 @@ const DebtorsInvoiceReport = () => {
   const [originalData, setOriginalData] = useState([])
   const [allOverTotal, setAllOverTotal] = useState()
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -66,15 +66,15 @@ const DebtorsInvoiceReport = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -89,23 +89,23 @@ const DebtorsInvoiceReport = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   const fetchData = async () => {
     setLoading(true)
     setIsFetching(true)
 
     try {
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}`
+      const token = `Bearer ${session.user.token}`
       const config = { headers: { Authorization: token } }
       const tableNames = id
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/DebtorsInvoicesReports?tableName=${id}`
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/DebtorsInvoicesReports?tableName=${id}&shopKey=${shopKey}`
 
       console.log('API URL:', apiUrl)
       const response = await axios.get(apiUrl, config)
@@ -113,90 +113,91 @@ const DebtorsInvoiceReport = () => {
 
       setAllOverTotal(response?.data?.overallTotalAmount)
 
-      const flattenedData = responseData?.groupedArray.flatMap(({ transactions, DebtorCode, DebtorName,totalAmount }) =>
-        transactions.map(({ DateTime, Description, Amount, Reference, UserName }) => ({
-          DateTime,
-          Description,
-          Amount,
-          Reference,
-          UserName,
-          DebtorName,
-          DebtorCode,
-          totalAmount
-        }))
+      const flattenedData = responseData?.groupedArray.flatMap(
+        ({ transactions, DebtorCode, DebtorName, totalAmount }) =>
+          transactions.map(({ DateTime, Description, Amount, Reference, UserName }) => ({
+            DateTime,
+            Description,
+            Amount,
+            Reference,
+            UserName,
+            DebtorName,
+            DebtorCode,
+            totalAmount
+          }))
       )
 
       setFlattenedData(flattenedData)
       setOriginalData(flattenedData)
 
-        // Column configuration remains the same as before
-        const customColumns = [
-          columnHelper.accessor('DateTime', {
-            id: 'DateTime',
-            cell: info => formatDateTime(info.getValue()),
-            header: 'Date & Time',
-            enableSorting: true
-          }),
+      // Column configuration remains the same as before
+      const customColumns = [
+        columnHelper.accessor('DateTime', {
+          id: 'DateTime',
+          cell: info => formatDateTime(info.getValue()),
+          header: 'Date & Time',
+          enableSorting: true
+        }),
 
-          columnHelper.accessor('Reference', {
-            id: 'Reference',
-            cell: info => info.getValue(),
-            header: 'Reference',
-            enableSorting: true
-          }),
-          columnHelper.accessor('Description', {
-            id: 'Description',
-            cell: info => info.getValue(),
-            header: 'Method',
-            enableSorting: true
-          }),
+        columnHelper.accessor('Reference', {
+          id: 'Reference',
+          cell: info => info.getValue(),
+          header: 'Reference',
+          enableSorting: true
+        }),
+        columnHelper.accessor('Description', {
+          id: 'Description',
+          cell: info => info.getValue(),
+          header: 'Method',
+          enableSorting: true
+        }),
 
-          columnHelper.accessor('Amount', {
-            id: 'Amount',
-            cell: info => info.getValue(),
-            header: 'Amount',
-            enableSorting: true
-          }),
+        columnHelper.accessor('Amount', {
+          id: 'Amount',
+          cell: info => info.getValue(),
+          header: 'Amount',
+          enableSorting: true
+        }),
 
-          columnHelper.accessor('UserName', {
-            id: 'UserName',
-            cell: info => info.getValue(),
-            header: 'User',
-            enableSorting: true
-          })
-        ]
-
-        setColumns(customColumns)
-
-        const visibility = {}
-        const clickedState = {}
-
-        const defaultVisibleColumns = ['DateTime', 'Description', 'Amount', 'Reference']
-
-        customColumns.forEach(column => {
-          visibility[column.id] = defaultVisibleColumns.includes(column.id)
-          clickedState[column.id] = defaultVisibleColumns.includes(column.id)
+        columnHelper.accessor('UserName', {
+          id: 'UserName',
+          cell: info => info.getValue(),
+          header: 'User',
+          enableSorting: true
         })
+      ]
 
-        setColumnVisibility(visibility)
-        setClickedButtons(clickedState)
-      } catch (error) {
-        console.error('Error fetching or setting sales data:', error)
+      setColumns(customColumns)
 
-        if (error.response && error.response.status === 401) {
-          await signOut({ redirect: false })
-          router.push('/login')
-        }
-      } finally {
-        setLoading(false)
-        setIsFetching(false)
+      const visibility = {}
+      const clickedState = {}
+
+      const defaultVisibleColumns = ['DateTime', 'Description', 'Amount', 'Reference']
+
+      customColumns.forEach(column => {
+        visibility[column.id] = defaultVisibleColumns.includes(column.id)
+        clickedState[column.id] = defaultVisibleColumns.includes(column.id)
+      })
+
+      setColumnVisibility(visibility)
+      setClickedButtons(clickedState)
+    } catch (error) {
+      console.error('Error fetching or setting sales data:', error)
+
+      if (error.response && error.response.status === 401) {
+        await signOut({ redirect: false })
+        router.push('/login')
       }
+    } finally {
+      setLoading(false)
+      setIsFetching(false)
     }
+  }
 
   useEffect(() => {
     fetchData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.token, shopKey])
   useEffect(() => {
     const filtered = originalData.filter(item => {
       const itemDate = new Date(item.DateTime)
@@ -612,14 +613,13 @@ const DebtorsInvoiceReport = () => {
           {Object.values(
             flattenedData.reduce((acc, product) => {
               const key = product.DebtorCode
-             // eslint-disable-next-line padding-line-between-statements
-             if (!acc[key]) {
+              // eslint-disable-next-line padding-line-between-statements
+              if (!acc[key]) {
                 acc[key] = {
                   departmentInfo: {
                     DebtorCode: product.DebtorCode,
-                    totalAmount:product.totalAmount,
-                    DebtorName:product.DebtorName,
-
+                    totalAmount: product.totalAmount,
+                    DebtorName: product.DebtorName
                   },
                   products: []
                 }

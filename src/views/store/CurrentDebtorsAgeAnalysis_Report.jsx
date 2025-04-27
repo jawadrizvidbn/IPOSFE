@@ -59,6 +59,8 @@ const CurrentDebtorsAgeAnalysis_Report = () => {
   const [acctTerms, setAcctTerms] = useState([])
   const [selectedAccountSystem, setSelectedAccountSystem] = useState('')
   const [selectedAcctTerm, setSelectedAcctTerm] = useState('')
+
+  const shopKey = searchParams.get('shopKey')
   // eslint-disable-next-line padding-line-between-statements
   useEffect(() => {
     if (startDateFromURL) {
@@ -72,15 +74,15 @@ const CurrentDebtorsAgeAnalysis_Report = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -95,20 +97,20 @@ const CurrentDebtorsAgeAnalysis_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const getAllCURRENTDebtorsAgeAnalysisACCTERMSAndAccountSystem = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
           // eslint-disable-next-line newline-before-return
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCURRENTDebtorsAgeAnalysisACCTERMSAndAccountSystem`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCURRENTDebtorsAgeAnalysisACCTERMSAndAccountSystem?shopKey=${shopKey}`
         const response = await axios.get(apiUrl, config)
         const responseData = response.data || []
 
@@ -132,15 +134,16 @@ const CurrentDebtorsAgeAnalysis_Report = () => {
     }
 
     getAllCURRENTDebtorsAgeAnalysisACCTERMSAndAccountSystem()
-  }, [session, router])
+  }, [session?.user?.token, shopKey, router])
+
   useEffect(() => {
     handleFetchData() // Fetch data whenever selectedAccountSystem or selectedAcctTerm changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAccountSystem, selectedAcctTerm, checkBalance, session, router]) // Include checkBalance if it affects the fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAccountSystem, selectedAcctTerm, checkBalance, session?.user?.token, shopKey, router]) // Include checkBalance if it affects the fetch
 
   const handleFetchData = async () => {
     try {
-      const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+      const token = `Bearer ${session.user.token}` // Ensure this is the correct token
       const config = { headers: { Authorization: token } }
 
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/CURRENTDebtorsAgeAnalysisReport?debtorGroup=${selectedAccountSystem}&previousAging=${selectedAcctTerm}&checkBalanceGreaterthanZero=${checkBalance}`

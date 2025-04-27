@@ -52,9 +52,10 @@ const DebtorsCreditNotesReports = () => {
   const [columnVisibility, setColumnVisibility] = useState({})
   const [grandTotal, setGrandTotal] = useState(null) // State for grand total
   const [sorting, setSorting] = useState([]) // State for sorting
-  const [nodatamessage, setNoDataMessage]=useState("");
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [nodatamessage, setNoDataMessage] = useState('')
+  const [loading, setLoading] = useState(true) // Add loading state
 
+  const shopKey = searchParams.get('shopKey')
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -67,15 +68,15 @@ const DebtorsCreditNotesReports = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -90,20 +91,20 @@ const DebtorsCreditNotesReports = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+        const token = `Bearer ${session.user.token}` // Ensure this is the correct token
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/debtorsCreditNotesReports?tableName=${id}`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/debtorsCreditNotesReports?tableName=${id}&shopKey=${shopKey}`
 
         // Validate API URL
         console.log('API URL:', apiUrl)
@@ -195,13 +196,13 @@ const DebtorsCreditNotesReports = () => {
           await signOut({ redirect: false })
           router.push('/login')
         }
-      }  finally {
-        setLoading(false); // Hide loader after data is fetched or in case of error
+      } finally {
+        setLoading(false) // Hide loader after data is fetched or in case of error
       }
     }
 
     fetchData()
-  }, [session, id, router])
+  }, [session?.user?.token, shopKey, id, router])
 
   useEffect(() => {
     const filtered = data?.filter(item => {
@@ -630,81 +631,80 @@ const DebtorsCreditNotesReports = () => {
       </div>
 
       <div id='tableContainer' className='sm:text-sm md:text-base lg:text-lg xl:text-xl' ref={containerRef}>
-      {loading ? ( // Show loading spinner or message if loading is true
-      <div className="text-center">
-        <p>Loading...</p> {/* You can replace this with a spinner if you'd like */}
-      </div>
-    ) : filteredData.length > 0 ? (
-        <div>
-          {filteredData.length > 0 &&
-            filteredData.map((debtorData, index) => (
-              <div key={index} className='min-w-full bg-white border border-gray-200'>
-                {/* Group Header */}
-                <div className='bg-gray-100 flex justify-between p-2'>
-                  <div className='mr-2'>
-                    <strong>Debtor Code:</strong> {debtorData?.DebtorCode}
-                  </div>
-                  <div>
-                    <strong>Debtor Name:</strong> {debtorData?.DebtorName || '-'}
-                  </div>
-                </div>
-                {/* Table for each group */}
-                <table className='min-w-full bg-white border border-gray-200'>
-                  <thead className='bg-gray-100'>
-                    {table.getHeaderGroups().map(headerGroup => (
-                      <tr key={headerGroup.id}>
-                        {headerGroup.headers.map(header => (
-                          <th
-                            key={header.id}
-                            className='cursor-pointer'
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            <div
-                              className='border border-gray-200 text-center font-semibold text-gray-700 flex items-center justify-center'
-                              id='Header'
-                            >
-                              {header.isPlaceholder ? null : (
-                                <>
-                                  {flexRender(header.column.columnDef.header, header.getContext())}
-                                  {header.column.getIsSorted()
-                                    ? header.column.getIsSorted() === 'asc'
-                                      ? ' 🔼'
-                                      : ' 🔽'
-                                    : ''}
-                                </>
-                              )}
-                            </div>
-                          </th>
-                        ))}
-                      </tr>
-                    ))}
-                  </thead>
-                  <tbody>
-                    {table.getRowModel().rows.map(row => (
-                      <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                        {row.getVisibleCells().map(cell => (
-                          <td key={cell.id} className='p-1 border border-gray-200 text-center'>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div className='p-2 text-left bg-gray-100'>
-                  <strong>Debtor Invoice Totals:</strong> {debtorData?.Amount || '0'}
-                </div>
-              </div>
-            ))}
-          <div className='p-2 text-left bg-gray-100'>
-            <strong>All Invoices Totals :</strong> {grandTotal || '0'}
+        {loading ? ( // Show loading spinner or message if loading is true
+          <div className='text-center'>
+            <p>Loading...</p> {/* You can replace this with a spinner if you'd like */}
           </div>
-        </div>): (
-      nodatamessage ? (
-        <h4 className="text-center">{nodatamessage}</h4>
-      ) : null
-    )} 
+        ) : filteredData.length > 0 ? (
+          <div>
+            {filteredData.length > 0 &&
+              filteredData.map((debtorData, index) => (
+                <div key={index} className='min-w-full bg-white border border-gray-200'>
+                  {/* Group Header */}
+                  <div className='bg-gray-100 flex justify-between p-2'>
+                    <div className='mr-2'>
+                      <strong>Debtor Code:</strong> {debtorData?.DebtorCode}
+                    </div>
+                    <div>
+                      <strong>Debtor Name:</strong> {debtorData?.DebtorName || '-'}
+                    </div>
+                  </div>
+                  {/* Table for each group */}
+                  <table className='min-w-full bg-white border border-gray-200'>
+                    <thead className='bg-gray-100'>
+                      {table.getHeaderGroups().map(headerGroup => (
+                        <tr key={headerGroup.id}>
+                          {headerGroup.headers.map(header => (
+                            <th
+                              key={header.id}
+                              className='cursor-pointer'
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              <div
+                                className='border border-gray-200 text-center font-semibold text-gray-700 flex items-center justify-center'
+                                id='Header'
+                              >
+                                {header.isPlaceholder ? null : (
+                                  <>
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                    {header.column.getIsSorted()
+                                      ? header.column.getIsSorted() === 'asc'
+                                        ? ' 🔼'
+                                        : ' 🔽'
+                                      : ''}
+                                  </>
+                                )}
+                              </div>
+                            </th>
+                          ))}
+                        </tr>
+                      ))}
+                    </thead>
+                    <tbody>
+                      {table.getRowModel().rows.map(row => (
+                        <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                          {row.getVisibleCells().map(cell => (
+                            <td key={cell.id} className='p-1 border border-gray-200 text-center'>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className='p-2 text-left bg-gray-100'>
+                    <strong>Debtor Invoice Totals:</strong> {debtorData?.Amount || '0'}
+                  </div>
+                </div>
+              ))}
+            <div className='p-2 text-left bg-gray-100'>
+              <strong>All Invoices Totals :</strong> {grandTotal || '0'}
+            </div>
+          </div>
+        ) : nodatamessage ? (
+          <h4 className='text-center'>{nodatamessage}</h4>
+        ) : null}
       </div>
       <style jsx>{`
         .origin-top-right {

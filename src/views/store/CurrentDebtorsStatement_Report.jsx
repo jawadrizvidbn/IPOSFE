@@ -60,18 +60,20 @@ const CurrentDebtorsStatement_Report = () => {
   const [selectedDebtorType, setSelectedDebtorType] = useState('1')
   const [loading, setLoading] = useState(false)
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -86,20 +88,21 @@ const CurrentDebtorsStatement_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
+
   useEffect(() => {
     const GetCurrentDebortsDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
         const debtorType = selectedDebtorType === '0' ? 'Laybye' : 'Normal'
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCurrentDeborsDetails?AccountSystem=${debtorType}`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCurrentDeborsDetails?AccountSystem=${debtorType}&shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -110,7 +113,7 @@ const CurrentDebtorsStatement_Report = () => {
     }
 
     GetCurrentDebortsDetails()
-  }, [session, selectedDebtorType])
+  }, [session?.user?.token, shopKey, selectedDebtorType])
 
   const handleSelectChange = e => {
     setSelectedDebtor(e.target.value)
@@ -136,13 +139,13 @@ const CurrentDebtorsStatement_Report = () => {
       setClickedButtons({}) // Clear clicked button states
 
       // Ensure session and user data is available
-      if (!session || !session.user || !session.user.id) {
+      if (!session || !session.user || !session.user.token) {
         console.error('Session data not available')
 
         return
       }
 
-      const token = `Bearer ${session.user.id}` // Authorization token
+      const token = `Bearer ${session.user.token}` // Authorization token
       const config = { headers: { Authorization: token } }
 
       // Determine debtor type based on selectedDebtorType

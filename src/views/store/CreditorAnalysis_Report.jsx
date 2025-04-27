@@ -58,6 +58,8 @@ const CreditorAnalysis_Report = () => {
   const [selectedDate, setSelectedDate] = useState(null)
   const [dataDropDown, setDataDropDown] = useState([])
 
+  const shopKey = searchParams.get('shopKey')
+
   useEffect(() => {
     if (startDateFromURL) {
       setFilterStartDate(startDateFromURL) // Set filterStartDate to the value from URL
@@ -67,18 +69,19 @@ const CreditorAnalysis_Report = () => {
       setFilterEndDate(endDateFromURL) // Set filterEndDate to the value from URL
     }
   }, [startDateFromURL, endDateFromURL]) // Re-run if URL params change
+
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/tblReg?shopKey=${shopKey}`
 
         const response = await axios.get(apiUrl, config)
 
@@ -93,20 +96,20 @@ const CreditorAnalysis_Report = () => {
     }
 
     fetchCompanyDetails()
-  }, [session])
+  }, [session?.user?.token, shopKey])
 
   useEffect(() => {
     const GetAllCreditorAnalysisCmbPreviousAging = async () => {
       try {
-        if (!session || !session.user || !session.user.id) {
+        if (!session || !session.user || !session.user.token) {
           console.error('Session data not available')
 
           return
         }
 
-        const token = `Bearer ${session.user.id}`
+        const token = `Bearer ${session.user.token}`
         const config = { headers: { Authorization: token } }
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCreditorAnalysisCmbPreviousAging`
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/GetAllCreditorAnalysisCmbPreviousAging?shopKey=${shopKey}`
         const response = await axios.get(apiUrl, config)
         const responseData = response.data || []
 
@@ -132,7 +135,7 @@ const CreditorAnalysis_Report = () => {
     }
 
     GetAllCreditorAnalysisCmbPreviousAging()
-  }, [session, router])
+  }, [session?.user?.token, shopKey, router])
 
   const handleDateChange = e => {
     setSelectedDate(e.target.value)
@@ -146,14 +149,14 @@ const CreditorAnalysis_Report = () => {
     }
 
     try {
-      const token = `Bearer ${session.user.id}` // Ensure this is the correct token
+      const token = `Bearer ${session.user.token}` // Ensure this is the correct token
       const config = { headers: { Authorization: token } }
 
       const apiUrl = `${
         process.env.NEXT_PUBLIC_API_URL
       }/database/CreditorAnalysisReport?CmbPreviousAging=${encodeURIComponent(
         selectedDate
-      )}&checkBalanceGreaterthanZero=${checkBalance}`
+      )}&checkBalanceGreaterthanZero=${checkBalance}&shopKey=${shopKey}`
 
       // Validate API URL
       console.log('API URL:', apiUrl)
