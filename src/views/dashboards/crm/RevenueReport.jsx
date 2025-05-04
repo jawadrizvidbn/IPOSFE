@@ -5,37 +5,72 @@ import dynamic from 'next/dynamic'
 
 // MUI Imports
 import Card from '@mui/material/Card'
+import Grid from '@mui/material/Grid'
 import { useColorScheme, useTheme } from '@mui/material/styles'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import CircularProgress from '@mui/material/CircularProgress'
+import Typography from '@mui/material/Typography'
 
 // Components Imports
 import OptionsMenu from '@core/components/option-menu'
 
 // Util Imports
 import { rgbaToHex } from '@/utils/rgbaToHex'
+import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { getRevenueReport, setCurrentStore } from '@/redux/reducers/dashboardSlice'
+import { thunkStatus } from '@/utils/statusHandler'
 
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-const series = [
-  {
-    name: 'Earning',
-    data: [95, 177, 284, 256, 105, 63, 168, 218, 72]
-  },
-  {
-    name: 'Expense',
-    data: [-145, -80, -60, -180, -100, -60, -85, -75, -100]
-  }
-]
-
 const RevenueReport = () => {
-  // Hook
+  // Hooks
   const theme = useTheme()
   const { mode, systemMode } = useColorScheme()
+  const dispatch = useDispatch()
+  const currentUser = useSelector(state => state.auth.user)
+  const currentStore = useSelector(state => state.dashboard.currentStore)
+  const revenueData = useSelector(state => state.dashboard.revenueReport)
+  const revenueLoading = useSelector(state => state.dashboard.getRevenueReportStatus === thunkStatus.LOADING)
+
+  // Set first store as default if not already set
+  useEffect(() => {
+    if (currentUser?.allowedStores?.length > 0 && !currentStore) {
+      dispatch(setCurrentStore(currentUser.allowedStores[0]))
+    }
+  }, [currentUser, currentStore, dispatch])
+
+  useEffect(() => {
+    if (currentStore) {
+      dispatch(getRevenueReport({ shopKey: currentStore }))
+    }
+  }, [currentStore, dispatch])
 
   // Vars
   const _mode = (mode === 'system' ? systemMode : mode) || 'light'
+
+  const handleStoreChange = event => {
+    dispatch(setCurrentStore(event.target.value))
+  }
+
+  const series = revenueData?.data
+    ? [
+        {
+          name: 'Earning',
+          data: revenueData.data.map(item => item.earning)
+        },
+        {
+          name: 'Expense',
+          data: revenueData.data.map(item => item.expense)
+        }
+      ]
+    : []
 
   const options = {
     chart: {
@@ -43,7 +78,12 @@ const RevenueReport = () => {
       parentHeightOffset: 0,
       toolbar: { show: false }
     },
-    tooltip: { enabled: false },
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: value => `$${value.toLocaleString()}`
+      }
+    },
     grid: {
       show: false,
       padding: {
@@ -62,7 +102,13 @@ const RevenueReport = () => {
       width: 3,
       colors: [theme.palette.background.paper]
     },
-    dataLabels: { enabled: false },
+    dataLabels: {
+      enabled: true,
+      style: {
+        colors: ['#000']
+      },
+      formatter: value => `$${Math.abs(value).toLocaleString()}`
+    },
     colors: [theme.palette.success.main, theme.palette.secondary.main],
     plotOptions: {
       bar: {
@@ -81,9 +127,12 @@ const RevenueReport = () => {
       }
     },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      categories: revenueData?.data?.map(item => item.month) || [],
       labels: {
-        show: false
+        show: true,
+        style: {
+          colors: rgbaToHex(`rgb(${theme.mainColorChannels[_mode]} / 0.7)`)
+        }
       },
       axisTicks: {
         show: false
@@ -93,7 +142,13 @@ const RevenueReport = () => {
       }
     },
     yaxis: {
-      labels: { show: false }
+      labels: {
+        show: false,
+        formatter: value => `$${value.toLocaleString()}`,
+        style: {
+          colors: rgbaToHex(`rgb(${theme.mainColorChannels[_mode]} / 0.7)`)
+        }
+      }
     },
     responsive: [
       {
@@ -177,11 +232,32 @@ const RevenueReport = () => {
     <Card>
       <CardHeader
         title='Revenue Report'
-        action={<OptionsMenu iconClassName='text-textPrimary' options={['Last 28 Days', 'Last Month', 'Last Year']} />}
+        action={
+          <FormControl size='small' sx={{ minWidth: 120 }}>
+            <InputLabel id='store-select-label'>Store</InputLabel>
+            <Select labelId='store-select-label' value={currentStore || ''} label='Store' onChange={handleStoreChange}>
+              {currentUser?.allowedStores?.map(store => (
+                <MenuItem key={store} value={store}>
+                  {store}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        }
       />
-      <CardContent>
-        <AppReactApexCharts type='bar' height={238} width='100%' series={series} options={options} />
-      </CardContent>
+      {revenueLoading ? (
+        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <CircularProgress />
+        </CardContent>
+      ) : revenueData?.data?.length > 0 ? (
+        <CardContent>
+          <AppReactApexCharts type='bar' height={400} width='100%' series={series} options={options} />
+        </CardContent>
+      ) : (
+        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <Typography color='text.secondary'>No revenue data available for the selected store</Typography>
+        </CardContent>
+      )}
     </Card>
   )
 }

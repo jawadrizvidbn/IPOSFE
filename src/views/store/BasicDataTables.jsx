@@ -10,6 +10,7 @@ import { signOut, useSession } from 'next-auth/react'
 
 import { setShopKey } from '@/redux/reducers/shopKeySlice'
 import { getLocalizedUrl } from '@/utils/i18n'
+import { logout } from '@/redux/reducers/authSlice'
 
 const BasicDataTables = () => {
   const [loading, setLoading] = useState(true)
@@ -34,7 +35,8 @@ const BasicDataTables = () => {
       })
 
       if (response.status === 401) {
-        signOut({ redirect: false })
+        dispatch(logout())
+        // signOut({ redirect: false })
         router.push(getLocalizedUrl('/login', 'en'))
 
         return

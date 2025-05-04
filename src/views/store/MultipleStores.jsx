@@ -10,6 +10,7 @@ import { signOut, useSession } from 'next-auth/react'
 
 import { setShopKey } from '@/redux/reducers/shopKeySlice'
 import { getLocalizedUrl } from '@/utils/i18n'
+import { logout } from '@/redux/reducers/authSlice'
 
 const MultipleStores = () => {
   const [loading, setLoading] = useState(true)
@@ -32,7 +33,8 @@ const MultipleStores = () => {
       })
 
       if (response.status === 401) {
-        signOut({ redirect: false })
+        // signOut({ redirect: false })
+        dispatch(logout())
         router.push(getLocalizedUrl('/login', 'en'))
 
         return

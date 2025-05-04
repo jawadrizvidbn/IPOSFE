@@ -41,7 +41,7 @@ const CardWidgetsSalesOverview = () => {
   const salesOverview = useSelector(state => state.dashboard.salesOverview)
   const salesOverviewLoading = useSelector(state => state.dashboard.getSalesOverviewStatus === thunkStatus.LOADING)
   const [duration, setDuration] = useState('monthly')
-  console.log({ salesOverviewLoading })
+
   useEffect(() => {
     if (currentStore) {
       dispatch(getSalesOverview({ shopKey: currentStore, duration }))
@@ -134,8 +134,8 @@ const CardWidgetsSalesOverview = () => {
     ]
   }
 
-  const grandTotal = salesOverview?.find(item => item.isGrand)?.totalSales || 0
-  const products = salesOverview?.filter(item => !item.isGrand) || []
+  const grandTotal = salesOverview?.find?.(item => item.isGrand)?.totalSales || 0
+  const products = salesOverview?.filter?.(item => !item.isGrand) || []
 
   return (
     <Card>
