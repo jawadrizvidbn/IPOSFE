@@ -45,6 +45,8 @@ const Across_Report = () => {
   const id = new URLSearchParams(searchParams).get('id') // Extracting the id parameter value
   const startDateFromURL = searchParams.get('startDate') || '' // Default to empty if not found
   const endDateFromURL = searchParams.get('endDate') || '' // Default to empty if not found
+  const shopKeys = searchParams.get('shopKeys')
+
   const router = useRouter()
   const [clickedButtons, setClickedButtons] = useState({})
   const [filterStartDate, setFilterStartDate] = useState('')
@@ -79,6 +81,7 @@ const Across_Report = () => {
       // eslint-disable-next-line padding-line-between-statements
       if (filterStartDate) params.append('startDate', filterStartDate)
       if (filterEndDate) params.append('endDate', filterEndDate)
+      if (shopKeys) params.append('shopKeys', shopKeys)
       if (params.toString()) apiUrl += `?${params.toString()}`
 
       try {

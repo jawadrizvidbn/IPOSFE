@@ -3,7 +3,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardHeader } from '@mui/material'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useSelector } from 'react-redux'
@@ -25,6 +25,9 @@ const AllDataAccrossRecords = () => {
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
   const shopKey = useSelector(state => state.shopKey)
+
+  const search = useSearchParams()
+  const shopKeys = search.get('shopKeys')
 
   const formatDate = date => {
     if (!date) return ''
@@ -59,13 +62,13 @@ const AllDataAccrossRecords = () => {
     const nameQueryString = names.length > 0 ? `id=${names.join(',')}` : ''
     const formattedStartDate = startDate ? startDate.toISOString().split('T')[0] : ''
     const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : ''
-    const queryString = `${nameQueryString}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+    const queryString = `${nameQueryString}&startDate=${formattedStartDate}&endDate=${formattedEndDate}&shopKeys=${shopKeys}`
     window.location.href = `/en/Across_Report?${queryString}`
   }
 
   return (
     <Card className='p-4'>
-      <CardHeader title={`${shopKey.toUpperCase()} Across Data Table`} />
+      <CardHeader title={`${shopKeys.toUpperCase()} Across Data Table`} />
       <div className='p-6'>
         <div className='flex flex-col md:flex-row items-center md:justify-between mb-4'>
           <div className='mb-2 md:mb-0 flex-1 md:text-center md:mr-2'>

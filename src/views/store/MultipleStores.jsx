@@ -80,20 +80,21 @@ const MultipleStores = () => {
     const baseNames = selectedShops.join(',')
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/activedatabaseMultiple/${baseNames}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/activedatabaseMultiple/${baseNames}`, {
+      //   method: 'GET',
+      //   headers: {
+      //     Authorization: `Bearer ${token}`
+      //   }
+      // })
 
-      if (!response.ok) throw new Error('Error activating selected shops')
+      // if (!response.ok) throw new Error('Error activating selected shops')
       // eslint-disable-next-line lines-around-comment
       // Optionally set the first selected shop key in redux
       // dispatch(setShopKey(selectedShops[0])) // Example: set the first selected shop key
 
       // Optionally navigate after activation
-      router.push('/Across_dump_data') // Uncomment if you want to navigate to reports
+      // router.push(`/Across_dump_data?shopKeys=${baseNames}`) // Uncomment if you want to navigate to reports
+      router.push(getLocalizedUrl(`Across_dump_data?shopKeys=${baseNames}`, 'en')) // Uncomment if you want to navigate to reports
     } catch (error) {
       console.error('Error activating shops:', error)
       // eslint-disable-next-line padding-line-between-statements
