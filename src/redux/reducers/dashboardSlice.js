@@ -8,8 +8,11 @@ const initialState = {
   currentStore: '',
   salesOverview: [],
   revenueReport: [],
+  topTurnoverStores: [],
+  topTransactionsStores: [],
   getSalesOverviewStatus: thunkStatus.IDLE,
-  getRevenueReport: thunkStatus.IDLE
+  getRevenueReport: thunkStatus.IDLE,
+  getTopStoresStatus: thunkStatus.IDLE
 }
 
 export const getSalesOverview = createAsyncThunk(
@@ -28,6 +31,17 @@ export const getRevenueReport = createAsyncThunk(
   }
 )
 
+export const getTopStores = createAsyncThunk(
+  `${name}/getTopStores`,
+  async ({ year = new Date().getFullYear() }, { dispatch, getState }) => {
+    const shopKeys = getState()?.auth?.user?.allowedStores || []
+    if (!Array.isArray(shopKeys)) return
+    const res = await dashboardService.getTopStores({ year }, { shopKeys })
+    dispatch(setTopTurnoverStores(res.data?.data?.byTurnover || []))
+    dispatch(setTopTransactionsStores(res.data?.data?.byTransactions || []))
+  }
+)
+
 const dashboardSlice = createSlice({
   name,
   initialState,
@@ -40,10 +54,17 @@ const dashboardSlice = createSlice({
     },
     setRevenueReport: (state, action) => {
       state.revenueReport = action.payload
+    },
+    setTopTurnoverStores: (state, action) => {
+      state.topTurnoverStores = action.payload
+    },
+    setTopTransactionsStores: (state, action) => {
+      state.topTransactionsStores = action.payload
     }
   }
 })
 
-export const { setCurrentStore, setSalesOverview, setRevenueReport } = dashboardSlice.actions
+export const { setCurrentStore, setSalesOverview, setRevenueReport, setTopTurnoverStores, setTopTransactionsStores } =
+  dashboardSlice.actions
 
 export default dashboardSlice.reducer

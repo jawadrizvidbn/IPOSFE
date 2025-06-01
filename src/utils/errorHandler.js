@@ -16,7 +16,7 @@ export const errorHandlerMiddleware = () => next => action => {
 }
 
 export const globalErrorHandler = error => {
-  console.log(error)
+  // console.log(error)
   if (typeof error === 'string') error = { message: error }
   error.message = error.message || 'An unknown error occurred!'
   toast.error(error.message)

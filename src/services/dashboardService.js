@@ -6,7 +6,10 @@ const getSalesOverview = async params => axiosInstance.get(`${BASE_URL}/sales-ov
 
 const getRevenueReport = async params => axiosInstance.get(`${BASE_URL}/revenue-report`, { params })
 
+const getTopStores = async (params, body) => axiosInstance.post(`${BASE_URL}/top-stores`, body, { params })
+
 export default {
   getSalesOverview,
-  getRevenueReport
+  getRevenueReport,
+  getTopStores
 }

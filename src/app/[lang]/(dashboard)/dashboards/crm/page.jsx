@@ -1,7 +1,7 @@
 // MUI Imports
 'use client'
 import Grid from '@mui/material/Grid'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 // Components Imports
 import { signOut, useSession } from 'next-auth/react'
@@ -9,6 +9,8 @@ import { signOut, useSession } from 'next-auth/react'
 import CardStatWithImage from '@components/card-statistics/Character'
 import CardStatVertical from '@components/card-statistics/Vertical'
 import Transactions from '@views/dashboards/crm/Transactions'
+import TopTransactionsCard from '@views/dashboards/crm/TopTransactionsCard'
+import TopTurnoverCard from '@views/dashboards/crm/TopTurnoverCard'
 import TotalSales from '@views/dashboards/crm/TotalSales'
 import RevenueReport from '@views/dashboards/crm/RevenueReport'
 import CardWidgetsSalesOverview from '@views/dashboards/crm/SalesOverview'
@@ -18,10 +20,17 @@ import LineAreaChart from '@views/dashboards/crm/LineAreaChart'
 import UpgradePlan from '@views/dashboards/crm/UpgradePlan'
 import MeetingSchedule from '@views/dashboards/crm/MeetingSchedule'
 import DeveloperMeetup from '@views/dashboards/crm/DeveloperMeetup'
+import { useEffect } from 'react'
+import { getTopStores } from '@/redux/reducers/dashboardSlice'
 
 const DashboardCRM = () => {
   const { data: session } = useSession()
 
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(getTopStores({}))
+  }, [session?.user?.id])
   return (
     <Grid container spacing={6}>
       {/* <Grid item xs={12} sm={6} md={3} className='self-end'>
@@ -44,9 +53,12 @@ const DashboardCRM = () => {
           src='/images/illustrations/characters/14.png'
         />
       </Grid> */}
-      {/* <Grid item xs={12} md={6} className='self-end'>
-        <Transactions />
-      </Grid> */}
+      <Grid item xs={12} md={6} className='self-end'>
+        <TopTransactionsCard />
+      </Grid>
+      <Grid item xs={12} md={6} className='self-end'>
+        <TopTurnoverCard />
+      </Grid>
       {/* <Grid item xs={12} sm={6} md={3}>
         <TotalSales />
       </Grid> */}
