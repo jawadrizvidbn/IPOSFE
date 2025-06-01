@@ -431,7 +431,7 @@ const Across_Report = () => {
 
       <div id='tableContainer' className='sm:text-sm md:text-base lg:text-lg xl:text-xl' ref={containerRef}>
         <div className=''>
-          <table className='min-w-full bg-white border border-gray-200'>
+          <table className='min-w-full border border-gray-200'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
