@@ -11,10 +11,14 @@ import { signOut, useSession } from 'next-auth/react'
 import { setShopKey } from '@/redux/reducers/shopKeySlice'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { logout } from '@/redux/reducers/authSlice'
+import { getAllShop } from '@/redux/reducers/databaseSlice'
+import { thunkStatus } from '@/utils/statusHandler'
 
 const MultipleStores = () => {
-  const [loading, setLoading] = useState(true)
-  const [shopKeys, setShopKeys] = useState([])
+  // const [loading, setLoading] = useState(true)
+  // const [shopKeys, setShopKeys] = useState([])
+  const loading = useSelector(state => state.database.getAllShopStatus === thunkStatus.LOADING)
+  const shopKeys = useSelector(state => state.database.allAcrossShops)
   const [selectedShops, setSelectedShops] = useState([]) // State for selected shops
   const router = useRouter()
   const dispatch = useDispatch()
@@ -23,41 +27,16 @@ const MultipleStores = () => {
   // Fetch shops based on user session
   const fetchShops = useCallback(async () => {
     if (!session) return // Ensure session is defined before fetching
-    const token = session.user.token
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/getallshop`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-
-      if (response.status === 401) {
-        // signOut({ redirect: false })
-        dispatch(logout())
-        router.push(getLocalizedUrl('/login', 'en'))
-
-        return
-      }
-
-      if (!response.ok) throw new Error('Failed to fetch shop data')
-
-      const data = await response.json()
-
-      setShopKeys(Object.keys(data))
-    } catch (error) {
-      console.error('Error fetching shops:', error)
-    } finally {
-      setLoading(false) // Set loading to false once data is fetched
-    }
-  }, [session, router])
+    dispatch(getAllShop())
+  }, [session?.user?.token, router])
 
   // Effect to fetch shops when session is available
   useEffect(() => {
     if (session) {
       fetchShops()
     }
-  }, [session, fetchShops])
+  }, [session?.user?.token, fetchShops])
 
   // Handle shop selection
   const handleShopClick = shopKey => {
@@ -74,26 +53,11 @@ const MultipleStores = () => {
   // Function to handle activation of selected shops
   const activateSelectedShops = async () => {
     if (!session || selectedShops.length === 0) return
-    const token = session.user.token
 
     // Create a comma-separated list of selected shop keys
     const baseNames = selectedShops.join(',')
 
     try {
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/database/activedatabaseMultiple/${baseNames}`, {
-      //   method: 'GET',
-      //   headers: {
-      //     Authorization: `Bearer ${token}`
-      //   }
-      // })
-
-      // if (!response.ok) throw new Error('Error activating selected shops')
-      // eslint-disable-next-line lines-around-comment
-      // Optionally set the first selected shop key in redux
-      // dispatch(setShopKey(selectedShops[0])) // Example: set the first selected shop key
-
-      // Optionally navigate after activation
-      // router.push(`/Across_dump_data?shopKeys=${baseNames}`) // Uncomment if you want to navigate to reports
       router.push(getLocalizedUrl(`Across_dump_data?shopKeys=${baseNames}`, 'en')) // Uncomment if you want to navigate to reports
     } catch (error) {
       console.error('Error activating shops:', error)
@@ -111,18 +75,10 @@ const MultipleStores = () => {
         <CardHeader
           title={
             <div className='font-bold text-center'>
-              <span className='text-3xl sm:text-4xl text-brown-600'>Please Select Multiple Across Store</span>
+              <span className='text-3xl sm:text-4xl text-black'>Please Select Multiple Across Store</span>
             </div>
           }
           className='text-center'
-          titleTypographyProps={{
-            style: {
-              margin: 0,
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 700,
-              letterSpacing: '0.5px'
-            }
-          }}
         />
       </div>
 

@@ -108,7 +108,8 @@ const Across_Report = () => {
     }
 
     fetchData()
-  }, [session, filterStartDate, filterEndDate, router])
+  }, [session?.user?.token, filterStartDate, filterEndDate, router])
+
   useEffect(() => {
     const filtered = data?.filter(item => {
       const itemDate = new Date(item.DateTime)
@@ -289,26 +290,6 @@ const Across_Report = () => {
 
       // Optionally show a user-friendly error message or notification
     }
-  }
-
-  const formatDate = date => {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' }
-
-    return date.toLocaleDateString(undefined, options)
-  }
-
-  const formatDateTime = DateTime => {
-    const date = new Date(DateTime)
-    const formattedDate = date.toLocaleDateString('en-GB') // Format as dd/mm/yyyy
-
-    const formattedTime = date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit', // Include seconds
-      hour12: true // Use 12-hour clock with AM/PM
-    })
-
-    return `${formattedDate} ${formattedTime}`
   }
 
   return (
