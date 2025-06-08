@@ -1,5 +1,11 @@
+export const REPORT_TYPE_VALUES = {
+  stock: 'stock',
+  turnover: 'turnover'
+}
+
 export const REPORT_TYPES = [
-  { value: 'stock', label: 'Stock Report' }
+  { value: 'stock', label: 'Stock Report' },
+  { value: 'turnover', label: 'Turnover Report' }
   // { value: 'inventory', label: 'Inventory Report' },
   // { value: 'price', label: 'Price Change Report' },
   // { value: 'stock', label: 'Stock Movement Report' }
@@ -7,7 +13,8 @@ export const REPORT_TYPES = [
 
 export const getReportTypeLabel = type => {
   const reportTypes = {
-    stock: 'Stock Report'
+    stock: 'Stock Report',
+    turnover: 'Turnover Report'
     // sales: 'Sales Report',
     // inventory: 'Inventory Report',
     // price: 'Price Change Report',
@@ -116,7 +123,7 @@ export const generateTableJSX = (reportType, reportData, grandTotal) => {
             </tr>
           ))}
         </tbody>
-        {grandTotal !== undefined && (
+        {grandTotal && (
           <tfoot>
             <tr>
               <td colSpan={displayKeys.length - 1} className='p-2 border border-gray-200 text-center font-semibold'>

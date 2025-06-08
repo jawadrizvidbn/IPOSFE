@@ -6,13 +6,15 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardHeader, Button, CircularProgress } from '@mui/material'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
 import { getReportTypeLabel, generateTableJSX } from '@/helpers/acrossReportHelpers'
+import { getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
+import { thunkStatus } from '@/utils/statusHandler'
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -27,16 +29,19 @@ const AllDataAccrossRecords = () => {
   const [filteredData, setFilteredData] = useState([])
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [reportData, setReportData] = useState([])
-  const [grandTotal, setGrandTotal] = useState(0)
+  const dispatch = useDispatch()
+  const isLoading = useSelector(state => state.acrossReports.getAcrossReportStatus === thunkStatus.LOADING)
+  const reportData = useSelector(state => state.acrossReports.reportData)
+  const grandTotal = useSelector(state => state.acrossReports.grandTotal)
   const containerRef = useRef(null)
   const shopKey = useSelector(state => state.shopKey)
-  const reportType = useSelector(state => state.acrossReports.reportType)
   const { data: session } = useSession()
 
   const search = useSearchParams()
+  const reportTypeFromSearch = search.get('reportType')
   const shopKeys = search.get('shopKeys')
+
+  const reportType = useSelector(state => state.acrossReports.reportType) || reportTypeFromSearch
 
   const formatDate = date => {
     if (!date) return ''
@@ -58,36 +63,8 @@ const AllDataAccrossRecords = () => {
     setFilteredData(filtered)
   }, [data, startName, endName])
 
-  const table = useReactTable({
-    data: filteredData.length > 0 ? filteredData : data,
-    columns,
-    getCoreRowModel: getCoreRowModel()
-  })
-
-  const generateReport = async () => {
-    if (!startDate || !endDate) {
-      alert('Please select both start and end dates')
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const token = `Bearer ${session.user.token}`
-      const config = { headers: { Authorization: token } }
-      const formattedStartDate = startDate.toISOString().split('T')[0]
-      const formattedEndDate = endDate.toISOString().split('T')[0]
-
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/accrossShopReport?startDate=${formattedStartDate}&endDate=${formattedEndDate}&shopKeys=${shopKeys}&reportType=${reportType}`
-
-      const response = await axios.get(apiUrl, config)
-      setReportData(response.data.finalResults || [])
-      setGrandTotal(response.data.grandTotalQty)
-    } catch (error) {
-      console.error('Error generating report:', error)
-      alert('Error generating report. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
+  const generateReport = () => {
+    dispatch(getAcrossReport({ params: { startDate, endDate, shopKeys, reportType } }))
   }
 
   const handleExport = type => {
