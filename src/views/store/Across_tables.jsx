@@ -13,7 +13,7 @@ import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
 import { getReportTypeLabel, generateTableJSX } from '@/helpers/acrossReportHelpers'
-import { getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
+import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 const columnHelper = createColumnHelper()
 
@@ -61,6 +61,10 @@ const AllDataAccrossRecords = () => {
       return startNameMatch && endNameMatch
     })
     setFilteredData(filtered)
+
+    return () => {
+      dispatch(cleanReportData())
+    }
   }, [data, startName, endName])
 
   const generateReport = () => {
@@ -97,8 +101,7 @@ const AllDataAccrossRecords = () => {
       <CardHeader
         title={
           <div className='flex flex-col items-center'>
-            <span className='text-2xl font-bold'>{`${shopKeys.toUpperCase()} Across Report`}</span>
-            <span className='text-lg text-red-50 mt-2'>{getReportTypeLabel(reportType)}</span>
+            <span className='text-2xl font-bold'>{getReportTypeLabel(reportType)}</span>
           </div>
         }
       />

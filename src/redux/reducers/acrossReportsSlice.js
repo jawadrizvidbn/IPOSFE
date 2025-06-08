@@ -25,6 +25,11 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
       dispatch(setReportData(response.data?.data?.byTurnover || []))
       dispatch(setGrandTotal(null))
       break
+    case REPORT_TYPE_VALUES.products:
+      response = await databaseService.acrossShopProducts(params)
+      dispatch(setReportData(response.data || []))
+      dispatch(setGrandTotal(null))
+      break
     default:
       break
   }
@@ -45,8 +50,13 @@ export const acrossReportsSlice = createSlice({
     },
     setGrandTotal: (state, action) => {
       state.grandTotal = action.payload
+    },
+    cleanReportData: (state, action) => {
+      state.reportData = []
+      state.grandTotal = 0
     }
   }
 })
-export const { setReportType, clearReportType, setReportData, setGrandTotal } = acrossReportsSlice.actions
+export const { setReportType, clearReportType, setReportData, setGrandTotal, cleanReportData } =
+  acrossReportsSlice.actions
 export default acrossReportsSlice.reducer

@@ -1,11 +1,13 @@
 export const REPORT_TYPE_VALUES = {
   stock: 'stock',
-  turnover: 'turnover'
+  turnover: 'turnover',
+  products: 'products'
 }
 
 export const REPORT_TYPES = [
   { value: 'stock', label: 'Stock Report' },
-  { value: 'turnover', label: 'Turnover Report' }
+  { value: 'turnover', label: 'Turnover Report' },
+  { value: 'products', label: 'Products Report' }
   // { value: 'inventory', label: 'Inventory Report' },
   // { value: 'price', label: 'Price Change Report' },
   // { value: 'stock', label: 'Stock Movement Report' }
@@ -14,7 +16,8 @@ export const REPORT_TYPES = [
 export const getReportTypeLabel = type => {
   const reportTypes = {
     stock: 'Stock Report',
-    turnover: 'Turnover Report'
+    turnover: 'Turnover Report',
+    products: 'Products Report'
     // sales: 'Sales Report',
     // inventory: 'Inventory Report',
     // price: 'Price Change Report',

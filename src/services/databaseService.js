@@ -8,8 +8,10 @@ const getAllShop = async () => axiosInstance.get(`${BASE_URL}/getallshop`)
 
 const accrossShopReport = async params => axiosInstance.get(`${BASE_URL}/accrossShopReport`, { params })
 
+const acrossShopProducts = async params => axiosInstance.get(`${BASE_URL}/acrossShopProducts`, { params })
 export default {
   connectNewServer,
   getAllShop,
-  accrossShopReport
+  accrossShopReport,
+  acrossShopProducts
 }
