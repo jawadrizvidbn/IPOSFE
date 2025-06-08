@@ -1,67 +1,64 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-
 import { useRouter } from 'next/navigation'
-
 import { useDispatch, useSelector } from 'react-redux'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import { signOut, useSession } from 'next-auth/react'
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 
 import { setShopKey } from '@/redux/reducers/shopKeySlice'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { logout } from '@/redux/reducers/authSlice'
 import { getAllShop } from '@/redux/reducers/databaseSlice'
 import { thunkStatus } from '@/utils/statusHandler'
+import { setReportType } from '@/redux/reducers/acrossReportsSlice'
+import { REPORT_TYPES } from '@/helpers/acrossReportHelpers'
 
 const MultipleStores = () => {
-  // const [loading, setLoading] = useState(true)
-  // const [shopKeys, setShopKeys] = useState([])
   const loading = useSelector(state => state.database.getAllShopStatus === thunkStatus.LOADING)
   const shopKeys = useSelector(state => state.database.allAcrossShops)
-  const [selectedShops, setSelectedShops] = useState([]) // State for selected shops
+  const selectedReportType = useSelector(state => state.acrossReports.reportType)
+  const [selectedShops, setSelectedShops] = useState([])
   const router = useRouter()
   const dispatch = useDispatch()
   const { data: session } = useSession()
 
-  // Fetch shops based on user session
   const fetchShops = useCallback(async () => {
-    if (!session) return // Ensure session is defined before fetching
-
+    if (!session) return
     dispatch(getAllShop())
   }, [session?.user?.token, router])
 
-  // Effect to fetch shops when session is available
   useEffect(() => {
     if (session) {
       fetchShops()
     }
   }, [session?.user?.token, fetchShops])
 
-  // Handle shop selection
+  const handleReportTypeChange = event => {
+    dispatch(setReportType(event.target.value))
+    setSelectedShops([])
+  }
+
   const handleShopClick = shopKey => {
-    if (!session) return
+    if (!session || !selectedReportType) return
     setSelectedShops(prevSelected => {
       if (prevSelected.includes(shopKey)) {
-        return prevSelected.filter(key => key !== shopKey) // Deselect shop
+        return prevSelected.filter(key => key !== shopKey)
       } else {
-        return [...prevSelected, shopKey] // Select shop
+        return [...prevSelected, shopKey]
       }
     })
   }
 
-  // Function to handle activation of selected shops
   const activateSelectedShops = async () => {
-    if (!session || selectedShops.length === 0) return
+    if (!session || selectedShops.length === 0 || !selectedReportType) return
 
-    // Create a comma-separated list of selected shop keys
     const baseNames = selectedShops.join(',')
-
     try {
-      router.push(getLocalizedUrl(`Across_dump_data?shopKeys=${baseNames}`, 'en')) // Uncomment if you want to navigate to reports
+      router.push(getLocalizedUrl(`Across_dump_data?shopKeys=${baseNames}&reportType=${selectedReportType}`, 'en'))
     } catch (error) {
       console.error('Error activating shops:', error)
-      // eslint-disable-next-line padding-line-between-statements
       if (error.response && error.response.status === 401) {
         signOut({ redirect: false })
         router.push(getLocalizedUrl('/login', 'en'))
@@ -82,21 +79,47 @@ const MultipleStores = () => {
         />
       </div>
 
+      <div className='mb-8'>
+        <FormControl focused={true} variant='outlined' fullWidth>
+          <InputLabel className='text-black border-black' id='report-type-label'>
+            Report Type
+          </InputLabel>
+          <Select
+            labelId='report-type-label'
+            id='report-type-select'
+            value={selectedReportType}
+            label='Report Type'
+            color='primary'
+            onChange={handleReportTypeChange}
+            className='text-black'
+          >
+            {REPORT_TYPES.map(type => (
+              <MenuItem key={type.value} value={type.value}>
+                {type.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-center mt-8'>
         {loading ? (
           <p className='text-xl text-gray-600 text-center'>Loading shops...</p>
         ) : shopKeys.length > 0 ? (
           shopKeys.map((shopKey, index) => {
             const formattedShopKey = shopKey.charAt(0).toUpperCase() + shopKey.slice(1)
-            const isSelected = selectedShops.includes(shopKey) // Check if shop is selected
+            const isSelected = selectedShops.includes(shopKey)
 
             return (
               <button
                 key={index}
                 onClick={() => handleShopClick(shopKey)}
+                disabled={!selectedReportType}
                 className={`w-full h-14 text-xl ${
                   isSelected ? 'bg-orange-600 text-white' : 'text-orange-600 border border-orange-600'
-                } py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg`}
+                } py-2 px-4 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg ${
+                  !selectedReportType ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 {formattedShopKey}
               </button>
@@ -107,11 +130,13 @@ const MultipleStores = () => {
         )}
       </div>
 
-      {/* Button to activate selected shops */}
       <div className='flex justify-center mt-6'>
         <button
           onClick={activateSelectedShops}
-          className='bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-700 transition duration-300'
+          disabled={!selectedReportType || selectedShops.length === 0}
+          className={`bg-green-600 text-white py-2 px-4 rounded-full transition duration-300 ${
+            !selectedReportType || selectedShops.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
+          }`}
         >
           Activate Selected Shops
         </button>

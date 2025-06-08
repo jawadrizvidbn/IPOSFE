@@ -12,7 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
-
+import { getReportTypeLabel, generateTableJSX } from '@/helpers/acrossReportHelpers'
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -32,6 +32,7 @@ const AllDataAccrossRecords = () => {
   const [grandTotal, setGrandTotal] = useState(0)
   const containerRef = useRef(null)
   const shopKey = useSelector(state => state.shopKey)
+  const reportType = useSelector(state => state.acrossReports.reportType)
   const { data: session } = useSession()
 
   const search = useSearchParams()
@@ -76,7 +77,7 @@ const AllDataAccrossRecords = () => {
       const formattedStartDate = startDate.toISOString().split('T')[0]
       const formattedEndDate = endDate.toISOString().split('T')[0]
 
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/accrossShopReport?startDate=${formattedStartDate}&endDate=${formattedEndDate}&shopKeys=${shopKeys}`
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/database/accrossShopReport?startDate=${formattedStartDate}&endDate=${formattedEndDate}&shopKeys=${shopKeys}&reportType=${reportType}`
 
       const response = await axios.get(apiUrl, config)
       setReportData(response.data.finalResults || [])
@@ -116,7 +117,14 @@ const AllDataAccrossRecords = () => {
 
   return (
     <Card className='p-4' ref={containerRef} id='main'>
-      <CardHeader title={`${shopKeys.toUpperCase()} Across Report`} />
+      <CardHeader
+        title={
+          <div className='flex flex-col items-center'>
+            <span className='text-2xl font-bold'>{`${shopKeys.toUpperCase()} Across Report`}</span>
+            <span className='text-lg text-red-50 mt-2'>{getReportTypeLabel(reportType)}</span>
+          </div>
+        }
+      />
       <div className='p-6'>
         <div className='flex flex-col items-center'>
           <div className='flex-1 flex items-end h-[120px] gap-4 mb-5'>
@@ -176,43 +184,7 @@ const AllDataAccrossRecords = () => {
         </div>
       </div>
 
-      {reportData.length > 0 && (
-        <div id='tableContainer' className='overflow-x-auto'>
-          <table className='min-w-full border border-gray-200'>
-            <thead className='bg-slate-600'>
-              <tr>
-                {Object.keys(reportData[0]).map(key => (
-                  <th key={key} className='p-2 border border-gray-200 text-center font-semibold'>
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.map((row, index) => (
-                <tr key={index}>
-                  {Object.values(row).map((value, i) => (
-                    <td key={i} className='p-2 border border-gray-200 text-center'>
-                      {value}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td
-                  colSpan={Object.keys(reportData[0]).length - 1}
-                  className='p-2 border border-gray-200 text-center font-semibold'
-                >
-                  Total Qty
-                </td>
-                <td className='p-2 border border-gray-200 text-center font-semibold'>{grandTotal}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      )}
+      {reportData.length > 0 && generateTableJSX(reportType, reportData, grandTotal)}
     </Card>
   )
 }
