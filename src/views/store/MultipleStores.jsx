@@ -51,6 +51,18 @@ const MultipleStores = () => {
     })
   }
 
+  const handleSelectAll = () => {
+    if (!selectedReportType) return
+
+    if (selectedShops.length === shopKeys.length) {
+      // If all shops are selected, deselect all
+      setSelectedShops([])
+    } else {
+      // If not all shops are selected, select all
+      setSelectedShops([...shopKeys])
+    }
+  }
+
   const activateSelectedShops = async () => {
     if (!session || selectedShops.length === 0 || !selectedReportType) return
 
@@ -65,6 +77,8 @@ const MultipleStores = () => {
       }
     }
   }
+
+  const isAllSelected = selectedShops.length === shopKeys.length && shopKeys.length > 0
 
   return (
     <Card className='p-8 shadow-xl rounded-lg mx-auto max-w-4xl bg-white transition-transform transform hover:scale-105'>
@@ -101,6 +115,23 @@ const MultipleStores = () => {
           </Select>
         </FormControl>
       </div>
+
+      {/* Select All Button */}
+      {shopKeys.length > 0 && (
+        <div className='flex justify-center mb-6'>
+          <button
+            onClick={handleSelectAll}
+            disabled={!selectedReportType}
+            className={`${
+              isAllSelected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'
+            } text-white py-2 px-6 rounded-full transition duration-300 ${
+              !selectedReportType ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {isAllSelected ? 'Deselect All' : 'Select All'}
+          </button>
+        </div>
+      )}
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-center mt-8'>
         {loading ? (

@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 export const REPORT_TYPE_VALUES = {
   stock: 'stock',
   turnover: 'turnover',
@@ -30,11 +32,11 @@ export const getReportTypeLabel = type => {
 export const TABLE_CONFIGS = {
   stock: {
     columns: [
-      { key: 'stockcode', label: 'Stock Code' },
-      { key: 'description', label: 'Description' },
-      { key: 'totalQty', label: 'Total Quantity' },
-      { key: 'unit', label: 'Unit' },
-      { key: 'price', label: 'Price' }
+      { key: 'stockcode', label: 'Stock Code', sort: true },
+      { key: 'description', label: 'Description', sort: true },
+      { key: 'totalQty', label: 'Total Quantity', sort: true },
+      { key: 'unit', label: 'Unit', sort: false },
+      { key: 'price', label: 'Price', sort: true }
     ],
     footer: {
       showTotal: true,
@@ -42,15 +44,43 @@ export const TABLE_CONFIGS = {
       totalLabel: 'Total Qty'
     }
   },
+  turnover: {
+    columns: [
+      { key: 'date', label: 'Date', sort: true },
+      { key: 'stockcode', label: 'Stock Code', sort: true },
+      { key: 'description', label: 'Description', sort: true },
+      { key: 'quantity', label: 'Quantity', sort: true },
+      { key: 'unit', label: 'Unit', sort: false },
+      { key: 'price', label: 'Price', sort: true },
+      { key: 'total', label: 'Total Amount', sort: true }
+    ],
+    footer: {
+      showTotal: true,
+      totalKey: 'total',
+      totalLabel: 'Total Sales'
+    }
+  },
+  products: {
+    columns: [
+      { key: 'stockcode', label: 'Stock Code', sort: true },
+      { key: 'description', label: 'Description', sort: true },
+      { key: 'category', label: 'Category', sort: true },
+      { key: 'price', label: 'Price', sort: true },
+      { key: 'status', label: 'Status', sort: false }
+    ],
+    footer: {
+      showTotal: false
+    }
+  },
   sales: {
     columns: [
-      { key: 'date', label: 'Date' },
-      { key: 'stockcode', label: 'Stock Code' },
-      { key: 'description', label: 'Description' },
-      { key: 'quantity', label: 'Quantity' },
-      { key: 'unit', label: 'Unit' },
-      { key: 'price', label: 'Price' },
-      { key: 'total', label: 'Total Amount' }
+      { key: 'date', label: 'Date', sort: true },
+      { key: 'stockcode', label: 'Stock Code', sort: true },
+      { key: 'description', label: 'Description', sort: true },
+      { key: 'quantity', label: 'Quantity', sort: true },
+      { key: 'unit', label: 'Unit', sort: false },
+      { key: 'price', label: 'Price', sort: true },
+      { key: 'total', label: 'Total Amount', sort: true }
     ],
     footer: {
       showTotal: true,
@@ -60,12 +90,12 @@ export const TABLE_CONFIGS = {
   },
   inventory: {
     columns: [
-      { key: 'stockcode', label: 'Stock Code' },
-      { key: 'description', label: 'Description' },
-      { key: 'currentStock', label: 'Current Stock' },
-      { key: 'minimumStock', label: 'Minimum Stock' },
-      { key: 'maximumStock', label: 'Maximum Stock' },
-      { key: 'reorderPoint', label: 'Reorder Point' }
+      { key: 'stockcode', label: 'Stock Code', sort: true },
+      { key: 'description', label: 'Description', sort: true },
+      { key: 'currentStock', label: 'Current Stock', sort: true },
+      { key: 'minimumStock', label: 'Minimum Stock', sort: true },
+      { key: 'maximumStock', label: 'Maximum Stock', sort: true },
+      { key: 'reorderPoint', label: 'Reorder Point', sort: true }
     ],
     footer: {
       showTotal: false
@@ -73,12 +103,12 @@ export const TABLE_CONFIGS = {
   },
   price: {
     columns: [
-      { key: 'date', label: 'Date' },
-      { key: 'stockcode', label: 'Stock Code' },
-      { key: 'description', label: 'Description' },
-      { key: 'oldPrice', label: 'Old Price' },
-      { key: 'newPrice', label: 'New Price' },
-      { key: 'changePercentage', label: 'Change %' }
+      { key: 'date', label: 'Date', sort: true },
+      { key: 'stockcode', label: 'Stock Code', sort: true },
+      { key: 'description', label: 'Description', sort: true },
+      { key: 'oldPrice', label: 'Old Price', sort: true },
+      { key: 'newPrice', label: 'New Price', sort: true },
+      { key: 'changePercentage', label: 'Change %', sort: true }
     ],
     footer: {
       showTotal: false
@@ -94,7 +124,131 @@ const formatColumnHeader = key => {
     .trim()
 }
 
+// Sorting function
+export const sortData = (data, sortConfig) => {
+  if (!sortConfig.key) return data
+
+  return [...data].sort((a, b) => {
+    const aValue = a[sortConfig.key]
+    const bValue = b[sortConfig.key]
+
+    // Handle null/undefined values
+    if (aValue === null || aValue === undefined) return 1
+    if (bValue === null || bValue === undefined) return -1
+
+    // Handle different data types
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
+    }
+
+    // Handle dates
+    if (typeof aValue === 'string' && aValue.match(/^\d{4}-\d{2}-\d{2}/)) {
+      const dateA = new Date(aValue)
+      const dateB = new Date(bValue)
+      return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA
+    }
+
+    // Handle strings
+    const stringA = String(aValue).toLowerCase()
+    const stringB = String(bValue).toLowerCase()
+
+    if (sortConfig.direction === 'asc') {
+      return stringA < stringB ? -1 : stringA > stringB ? 1 : 0
+    } else {
+      return stringA > stringB ? -1 : stringA < stringB ? 1 : 0
+    }
+  })
+}
+
+// Get sort icon based on current sort state
+export const getSortIcon = (columnKey, sortConfig) => {
+  if (sortConfig.key !== columnKey) {
+    return '↕️' // Default sort icon
+  }
+  return sortConfig.direction === 'asc' ? '↑' : '↓'
+}
+
+// Component for sortable table (use this in your React component)
+export const SortableTable = ({ reportType, reportData, grandTotal, sortableColumns = [] }) => {
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+
+  if (!reportData || reportData.length === 0) return null
+
+  // Generate columns dynamically from data
+  const allKeys = [...new Set(reportData.flatMap(item => Object.keys(item)))]
+  const displayKeys = allKeys.filter(key => !key.startsWith('_'))
+  console.log({ sortableColumns })
+  // Create columns with sortable configuration
+  const columns = displayKeys.map(key => ({
+    key,
+    label: formatColumnHeader(key),
+    sort: Array.isArray(sortableColumns) && sortableColumns.includes(key) // If sortableColumns provided, use it; otherwise all sortable
+  }))
+  console.log(columns)
+  const handleSort = (columnKey, canSort) => {
+    if (!canSort) return
+
+    let direction = 'asc'
+    if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key: columnKey, direction })
+  }
+
+  const sortedData = sortData(reportData, sortConfig)
+
+  return (
+    <div id='tableContainer' className='overflow-x-auto'>
+      <table className='min-w-full border border-gray-200'>
+        <thead className='bg-slate-600'>
+          <tr>
+            {columns.map(column => (
+              <th
+                key={column.key}
+                className={`p-2 border border-gray-200 text-center font-semibold text-white ${
+                  column.sort ? 'cursor-pointer hover:bg-slate-700 select-none' : ''
+                }`}
+                onClick={() => handleSort(column.key, column.sort)}
+                title={column.sort ? 'Click to sort' : ''}
+              >
+                <div className='flex items-center justify-center gap-1'>
+                  <span>{column.label}</span>
+                  {column.sort && <span className='text-xs opacity-70'>{getSortIcon(column.key, sortConfig)}</span>}
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sortedData.map((row, index) => (
+            <tr key={index}>
+              {columns.map(column => (
+                <td key={column.key} className='p-2 border border-gray-200 text-center'>
+                  {formatCellValue(row[column.key])}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        {grandTotal && (
+          <tfoot>
+            <tr>
+              <td colSpan={columns.length - 1} className='p-2 border border-gray-200 text-center font-semibold'>
+                Total
+              </td>
+              <td className='p-2 border border-gray-200 text-center font-semibold'>{formatCellValue(grandTotal)}</td>
+            </tr>
+          </tfoot>
+        )}
+      </table>
+    </div>
+  )
+}
+
+// Legacy function - updated to suggest using SortableTable component
 export const generateTableJSX = (reportType, reportData, grandTotal) => {
+  console.warn('generateTableJSX is deprecated. Please use the SortableTable component for sorting functionality.')
+
   if (!reportData || reportData.length === 0) return null
 
   // Get all unique keys from the data

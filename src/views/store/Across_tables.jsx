@@ -12,7 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
-import { getReportTypeLabel, generateTableJSX } from '@/helpers/acrossReportHelpers'
+import { getReportTypeLabel, generateTableJSX, SortableTable } from '@/helpers/acrossReportHelpers'
 import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 const columnHelper = createColumnHelper()
@@ -164,7 +164,9 @@ const AllDataAccrossRecords = () => {
         </div>
       </div>
 
-      {reportData.length > 0 && generateTableJSX(reportType, reportData, grandTotal)}
+      {reportData.length > 0 && (
+        <SortableTable grandTotal={grandTotal} reportData={reportData} reportType={reportType} />
+      )}
     </Card>
   )
 }
