@@ -1,15 +1,17 @@
 import { useState } from 'react'
 
 export const REPORT_TYPE_VALUES = {
+  quantitySold: 'quantitySold',
   stock: 'stock',
   turnover: 'turnover',
   products: 'products'
 }
 
 export const REPORT_TYPES = [
-  { value: 'stock', label: 'Stock Report' },
+  { value: 'quantitySold', label: 'Quantity Sold Report' },
   { value: 'turnover', label: 'Turnover Report' },
   { value: 'products', label: 'Products Report' }
+  // { value: 'stock', label: 'Stock Report' },
   // { value: 'inventory', label: 'Inventory Report' },
   // { value: 'price', label: 'Price Change Report' },
   // { value: 'stock', label: 'Stock Movement Report' }
@@ -19,101 +21,14 @@ export const getReportTypeLabel = type => {
   const reportTypes = {
     stock: 'Stock Report',
     turnover: 'Turnover Report',
-    products: 'Products Report'
+    products: 'Products Report',
+    quantitySold: 'Quantity Sold Report'
     // sales: 'Sales Report',
     // inventory: 'Inventory Report',
     // price: 'Price Change Report',
     // stock: 'Stock Movement Report'
   }
   return reportTypes[type] || type
-}
-
-// Table configurations for different report types
-export const TABLE_CONFIGS = {
-  stock: {
-    columns: [
-      { key: 'stockcode', label: 'Stock Code', sort: true },
-      { key: 'description', label: 'Description', sort: true },
-      { key: 'totalQty', label: 'Total Quantity', sort: true },
-      { key: 'unit', label: 'Unit', sort: false },
-      { key: 'price', label: 'Price', sort: true }
-    ],
-    footer: {
-      showTotal: true,
-      totalKey: 'totalQty',
-      totalLabel: 'Total Qty'
-    }
-  },
-  turnover: {
-    columns: [
-      { key: 'date', label: 'Date', sort: true },
-      { key: 'stockcode', label: 'Stock Code', sort: true },
-      { key: 'description', label: 'Description', sort: true },
-      { key: 'quantity', label: 'Quantity', sort: true },
-      { key: 'unit', label: 'Unit', sort: false },
-      { key: 'price', label: 'Price', sort: true },
-      { key: 'total', label: 'Total Amount', sort: true }
-    ],
-    footer: {
-      showTotal: true,
-      totalKey: 'total',
-      totalLabel: 'Total Sales'
-    }
-  },
-  products: {
-    columns: [
-      { key: 'stockcode', label: 'Stock Code', sort: true },
-      { key: 'description', label: 'Description', sort: true },
-      { key: 'category', label: 'Category', sort: true },
-      { key: 'price', label: 'Price', sort: true },
-      { key: 'status', label: 'Status', sort: false }
-    ],
-    footer: {
-      showTotal: false
-    }
-  },
-  sales: {
-    columns: [
-      { key: 'date', label: 'Date', sort: true },
-      { key: 'stockcode', label: 'Stock Code', sort: true },
-      { key: 'description', label: 'Description', sort: true },
-      { key: 'quantity', label: 'Quantity', sort: true },
-      { key: 'unit', label: 'Unit', sort: false },
-      { key: 'price', label: 'Price', sort: true },
-      { key: 'total', label: 'Total Amount', sort: true }
-    ],
-    footer: {
-      showTotal: true,
-      totalKey: 'total',
-      totalLabel: 'Total Sales'
-    }
-  },
-  inventory: {
-    columns: [
-      { key: 'stockcode', label: 'Stock Code', sort: true },
-      { key: 'description', label: 'Description', sort: true },
-      { key: 'currentStock', label: 'Current Stock', sort: true },
-      { key: 'minimumStock', label: 'Minimum Stock', sort: true },
-      { key: 'maximumStock', label: 'Maximum Stock', sort: true },
-      { key: 'reorderPoint', label: 'Reorder Point', sort: true }
-    ],
-    footer: {
-      showTotal: false
-    }
-  },
-  price: {
-    columns: [
-      { key: 'date', label: 'Date', sort: true },
-      { key: 'stockcode', label: 'Stock Code', sort: true },
-      { key: 'description', label: 'Description', sort: true },
-      { key: 'oldPrice', label: 'Old Price', sort: true },
-      { key: 'newPrice', label: 'New Price', sort: true },
-      { key: 'changePercentage', label: 'Change %', sort: true }
-    ],
-    footer: {
-      showTotal: false
-    }
-  }
 }
 
 // Helper function to format column headers
@@ -177,14 +92,12 @@ export const SortableTable = ({ reportType, reportData, grandTotal, sortableColu
   // Generate columns dynamically from data
   const allKeys = [...new Set(reportData.flatMap(item => Object.keys(item)))]
   const displayKeys = allKeys.filter(key => !key.startsWith('_'))
-  console.log({ sortableColumns })
   // Create columns with sortable configuration
   const columns = displayKeys.map(key => ({
     key,
     label: formatColumnHeader(key),
     sort: Array.isArray(sortableColumns) && sortableColumns.includes(key) // If sortableColumns provided, use it; otherwise all sortable
   }))
-  console.log(columns)
   const handleSort = (columnKey, canSort) => {
     if (!canSort) return
 
@@ -234,56 +147,6 @@ export const SortableTable = ({ reportType, reportData, grandTotal, sortableColu
           <tfoot>
             <tr>
               <td colSpan={columns.length - 1} className='p-2 border border-gray-200 text-center font-semibold'>
-                Total
-              </td>
-              <td className='p-2 border border-gray-200 text-center font-semibold'>{formatCellValue(grandTotal)}</td>
-            </tr>
-          </tfoot>
-        )}
-      </table>
-    </div>
-  )
-}
-
-// Legacy function - updated to suggest using SortableTable component
-export const generateTableJSX = (reportType, reportData, grandTotal) => {
-  console.warn('generateTableJSX is deprecated. Please use the SortableTable component for sorting functionality.')
-
-  if (!reportData || reportData.length === 0) return null
-
-  // Get all unique keys from the data
-  const allKeys = [...new Set(reportData.flatMap(item => Object.keys(item)))]
-
-  // Filter out any internal or system fields if needed
-  const displayKeys = allKeys.filter(key => !key.startsWith('_'))
-
-  return (
-    <div id='tableContainer' className='overflow-x-auto'>
-      <table className='min-w-full border border-gray-200'>
-        <thead className='bg-slate-600'>
-          <tr>
-            {displayKeys.map(key => (
-              <th key={key} className='p-2 border border-gray-200 text-center font-semibold text-white'>
-                {formatColumnHeader(key)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {reportData.map((row, index) => (
-            <tr key={index}>
-              {displayKeys.map(key => (
-                <td key={key} className='p-2 border border-gray-200 text-center'>
-                  {formatCellValue(row[key])}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-        {grandTotal && (
-          <tfoot>
-            <tr>
-              <td colSpan={displayKeys.length - 1} className='p-2 border border-gray-200 text-center font-semibold'>
                 Total
               </td>
               <td className='p-2 border border-gray-200 text-center font-semibold'>{formatCellValue(grandTotal)}</td>

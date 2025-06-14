@@ -12,7 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
-import { getReportTypeLabel, generateTableJSX, SortableTable } from '@/helpers/acrossReportHelpers'
+import { getReportTypeLabel, SortableTable } from '@/helpers/acrossReportHelpers'
 import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 const columnHelper = createColumnHelper()
@@ -32,6 +32,7 @@ const AllDataAccrossRecords = () => {
   const dispatch = useDispatch()
   const isLoading = useSelector(state => state.acrossReports.getAcrossReportStatus === thunkStatus.LOADING)
   const reportData = useSelector(state => state.acrossReports.reportData)
+  const sortableKeys = useSelector(state => state.acrossReports.sortableKeys)
   const grandTotal = useSelector(state => state.acrossReports.grandTotal)
   const containerRef = useRef(null)
   const shopKey = useSelector(state => state.shopKey)
@@ -165,7 +166,12 @@ const AllDataAccrossRecords = () => {
       </div>
 
       {reportData.length > 0 && (
-        <SortableTable grandTotal={grandTotal} reportData={reportData} reportType={reportType} />
+        <SortableTable
+          grandTotal={grandTotal}
+          reportData={reportData}
+          reportType={reportType}
+          sortableColumns={sortableKeys}
+        />
       )}
     </Card>
   )
