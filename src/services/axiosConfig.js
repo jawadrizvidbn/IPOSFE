@@ -25,7 +25,7 @@ axiosInstance.interceptors.response.use(
     // Handle unauthorized access (401) or forbidden access (403)
     if (error?.response?.status === 401 || error?.response?.status === 403) {
       // Sign out the user
-      await signOut({ redirect: true, callbackUrl: '/en/login' })
+      await signOut()
     }
     throw new Error(error?.response?.data?.message || error.message)
   }
