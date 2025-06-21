@@ -7,13 +7,11 @@ import CardHeader from '@mui/material/CardHeader'
 import { signOut, useSession } from 'next-auth/react'
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 
-import { setShopKey } from '@/redux/reducers/shopKeySlice'
 import { getLocalizedUrl } from '@/utils/i18n'
-import { logout } from '@/redux/reducers/authSlice'
 import { getAllShop } from '@/redux/reducers/databaseSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 import { setReportType } from '@/redux/reducers/acrossReportsSlice'
-import { REPORT_TYPES } from '@/helpers/acrossReportHelpers'
+import { REPORT_TYPES } from '@/helpers/acrossReportConst'
 
 const MultipleStores = () => {
   const loading = useSelector(state => state.database.getAllShopStatus === thunkStatus.LOADING)

@@ -1,14 +1,15 @@
-import { REPORT_TYPE_VALUES } from '@/helpers/acrossReportHelpers'
 import dashboardService from '@/services/dashboardService'
 import databaseService from '@/services/databaseService'
 import { thunkStatus } from '@/utils/statusHandler'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { REPORT_TYPE_VALUES } from '../../helpers/acrossReportConst'
 
 const name = 'acrossReports'
 const initialState = {
   reportType: '',
   reportData: [],
   sortableKeys: [],
+  storeFields: [],
   grandTotal: 0,
   getAcrossReportStatus: thunkStatus.IDLE
 }
@@ -26,10 +27,17 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
       response = await dashboardService.getTopStores(params, { shopKeys: params.shopKeys?.split?.(',') })
       dispatch(setReportData(response.data?.data?.byTurnover || []))
       dispatch(setSortableKeys(response.data?.data?.sortableKeys || []))
+      dispatch(setStoreFields(response.data?.data?.storeFields || []))
       dispatch(setGrandTotal(null))
       break
     case REPORT_TYPE_VALUES.products:
       response = await databaseService.acrossShopProducts(params)
+      dispatch(setReportData(response.data?.data || []))
+      dispatch(setSortableKeys(response.data?.sortableKeys || []))
+      dispatch(setGrandTotal(null))
+      break
+    case REPORT_TYPE_VALUES.retailWholesale:
+      response = await databaseService.acrossShopRetailWholesale(params)
       dispatch(setReportData(response.data?.data || []))
       dispatch(setSortableKeys(response.data?.sortableKeys || []))
       dispatch(setGrandTotal(null))
@@ -58,13 +66,24 @@ export const acrossReportsSlice = createSlice({
     setGrandTotal: (state, action) => {
       state.grandTotal = action.payload
     },
+    setStoreFields: (state, action) => {
+      state.storeFields = action.payload
+    },
     cleanReportData: (state, action) => {
       state.reportData = []
       state.grandTotal = 0
       state.sortableKeys = []
+      state.storeFields = []
     }
   }
 })
-export const { setReportType, clearReportType, setReportData, setSortableKeys, setGrandTotal, cleanReportData } =
-  acrossReportsSlice.actions
+export const {
+  setReportType,
+  clearReportType,
+  setReportData,
+  setSortableKeys,
+  setGrandTotal,
+  setStoreFields,
+  cleanReportData
+} = acrossReportsSlice.actions
 export default acrossReportsSlice.reducer

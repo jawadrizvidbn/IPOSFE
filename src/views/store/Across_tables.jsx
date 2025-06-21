@@ -2,7 +2,7 @@
 /* eslint-disable import/order */
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardHeader, Button, CircularProgress } from '@mui/material'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
@@ -12,9 +12,12 @@ import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
-import { getReportTypeLabel, SortableTable } from '@/helpers/acrossReportHelpers'
+import { getReportTypeLabel, REPORT_TYPE_VALUES } from '@/helpers/acrossReportConst'
+import { SortableTable } from '@/helpers/acrossReportHelpers'
 import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
 import { thunkStatus } from '@/utils/statusHandler'
+import AcrossReportFilters from './AcrossReportFilters'
+import RetailWholeSaleFilters from './RetailWholeSaleFilters'
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -25,48 +28,137 @@ const columns = [
 ]
 
 const AllDataAccrossRecords = () => {
-  const [data, setData] = useState([])
-  const [filteredData, setFilteredData] = useState([])
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
+  const [filters, setFilters] = useState({})
+  const [retailFilters, setRetailFilters] = useState([])
+  const [filteredReportData, setFilteredReportData] = useState([])
   const dispatch = useDispatch()
   const isLoading = useSelector(state => state.acrossReports.getAcrossReportStatus === thunkStatus.LOADING)
   const reportData = useSelector(state => state.acrossReports.reportData)
   const sortableKeys = useSelector(state => state.acrossReports.sortableKeys)
   const grandTotal = useSelector(state => state.acrossReports.grandTotal)
   const containerRef = useRef(null)
-  const shopKey = useSelector(state => state.shopKey)
-  const { data: session } = useSession()
 
   const search = useSearchParams()
   const reportTypeFromSearch = search.get('reportType')
   const shopKeys = search.get('shopKeys')
 
   const reportType = useSelector(state => state.acrossReports.reportType) || reportTypeFromSearch
-
-  const formatDate = date => {
-    if (!date) return ''
-    const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    return `${year}${month}`
-  }
-
-  const startName = formatDate(startDate)
-  const endName = formatDate(endDate)
+  const storeFields = useSelector(state => state.acrossReports.storeFields)
 
   useEffect(() => {
-    const filtered = data.filter(item => {
-      const itemName = item.Name.toLowerCase()
-      const startNameMatch = startName ? itemName >= startName.toLowerCase() : true
-      const endNameMatch = endName ? itemName <= endName.toLowerCase() : true
-      return startNameMatch && endNameMatch
+    if (!reportData || reportData.length === 0) {
+      setFilteredReportData([])
+      return
+    }
+
+    if (Object.keys(filters).length === 0) {
+      setFilteredReportData(reportData)
+      return
+    }
+
+    const filtered = reportData.filter(item => {
+      const shopData = storeFields.find(store => store[item.shopKey])
+      if (!shopData) return false
+      const storeInfo = shopData[item.shopKey]
+      if (!storeInfo) return false
+
+      return Object.entries(filters).every(([field, value]) => {
+        if (!value || (Array.isArray(value) && value.length === 0)) return true
+
+        const storeValue = storeInfo[field]
+
+        if (Array.isArray(value)) {
+          return value.includes(storeValue)
+        }
+
+        if (typeof storeValue === 'string' && typeof value === 'string') {
+          return storeValue.toLowerCase().includes(value.toLowerCase())
+        }
+
+        return storeValue === value
+      })
     })
-    setFilteredData(filtered)
+
+    setFilteredReportData(filtered)
 
     return () => {
       dispatch(cleanReportData())
     }
-  }, [data, startName, endName])
+  }, [reportData, filters, storeFields])
+
+  useEffect(() => {
+    // 1) No filters or both “retail”+“wholesale” → show everything
+    if (retailFilters.length === 0 || (retailFilters.includes('retail') && retailFilters.includes('wholesale'))) {
+      setFilteredReportData(reportData)
+      return
+    }
+
+    // 2) Otherwise, for each item grab all the keys ending in “Type”
+    //    and require _every_ one of them to be in retailFilters
+    const filtered = reportData.filter(item => {
+      const typeKeys = Object.keys(item).filter(key => key.toLowerCase().endsWith('type'))
+      return typeKeys.every(key => retailFilters.includes(item[key]))
+    })
+
+    setFilteredReportData(filtered)
+  }, [retailFilters, reportData])
+
+  const filterOptions = useMemo(() => {
+    if (!storeFields || storeFields.length === 0) return {}
+
+    const options = {}
+    if (reportType === 'turnover') {
+      const allFields = new Set()
+      storeFields.forEach(store => {
+        Object.values(store).forEach(storeData => {
+          Object.keys(storeData).forEach(field => {
+            allFields.add(field)
+          })
+        })
+      })
+
+      allFields.forEach(field => {
+        const values = new Set()
+        storeFields.forEach(store => {
+          Object.values(store).forEach(storeData => {
+            if (storeData[field] !== undefined && storeData[field] !== null) {
+              values.add(storeData[field])
+            }
+          })
+        })
+        options[field] = Array.from(values)
+      })
+    }
+
+    return options
+  }, [storeFields, reportType])
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleFilterDelete = field => {
+    setFilters(prev => {
+      const newFilters = { ...prev }
+      delete newFilters[field]
+      return newFilters
+    })
+  }
+
+  const handleRetailFilterChange = (name, value) => {
+    setRetailFilters(prev => {
+      if (value) {
+        return [...prev, name]
+      } else {
+        return prev.filter(item => item !== name)
+      }
+    })
+  }
 
   const generateReport = () => {
     dispatch(getAcrossReport({ params: { startDate, endDate, shopKeys, reportType } }))
@@ -165,10 +257,23 @@ const AllDataAccrossRecords = () => {
         </div>
       </div>
 
+      {reportType === REPORT_TYPE_VALUES.turnover && storeFields && storeFields.length > 0 && (
+        <AcrossReportFilters
+          filterOptions={filterOptions}
+          filters={filters}
+          handleFilterChange={handleFilterChange}
+          handleFilterDelete={handleFilterDelete}
+        />
+      )}
+
+      {reportType === REPORT_TYPE_VALUES.retailWholesale && (
+        <RetailWholeSaleFilters value={retailFilters} onChange={handleRetailFilterChange} />
+      )}
+
       {reportData.length > 0 && (
         <SortableTable
           grandTotal={grandTotal}
-          reportData={reportData}
+          reportData={filteredReportData.length > 0 ? filteredReportData : reportData}
           reportType={reportType}
           sortableColumns={sortableKeys}
         />

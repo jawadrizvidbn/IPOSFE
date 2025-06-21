@@ -1,36 +1,5 @@
 import { useState } from 'react'
 
-export const REPORT_TYPE_VALUES = {
-  quantitySold: 'quantitySold',
-  stock: 'stock',
-  turnover: 'turnover',
-  products: 'products'
-}
-
-export const REPORT_TYPES = [
-  { value: 'quantitySold', label: 'Quantity Sold Report' },
-  { value: 'turnover', label: 'Turnover Report' },
-  { value: 'products', label: 'Products Report' }
-  // { value: 'stock', label: 'Stock Report' },
-  // { value: 'inventory', label: 'Inventory Report' },
-  // { value: 'price', label: 'Price Change Report' },
-  // { value: 'stock', label: 'Stock Movement Report' }
-]
-
-export const getReportTypeLabel = type => {
-  const reportTypes = {
-    stock: 'Stock Report',
-    turnover: 'Turnover Report',
-    products: 'Products Report',
-    quantitySold: 'Quantity Sold Report'
-    // sales: 'Sales Report',
-    // inventory: 'Inventory Report',
-    // price: 'Price Change Report',
-    // stock: 'Stock Movement Report'
-  }
-  return reportTypes[type] || type
-}
-
 // Helper function to format column headers
 const formatColumnHeader = key => {
   return key
