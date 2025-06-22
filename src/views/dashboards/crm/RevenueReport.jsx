@@ -81,7 +81,7 @@ const RevenueReport = () => {
     tooltip: {
       enabled: true,
       y: {
-        formatter: value => `$${value.toLocaleString()}`
+        formatter: value => `${value.toLocaleString()}`
       }
     },
     grid: {
@@ -107,7 +107,7 @@ const RevenueReport = () => {
       style: {
         colors: ['#000']
       },
-      formatter: value => `$${Math.abs(value).toLocaleString()}`
+      formatter: value => `${Math.abs(value).toLocaleString()}`
     },
     colors: [theme.palette.success.main, theme.palette.secondary.main],
     plotOptions: {
@@ -144,7 +144,7 @@ const RevenueReport = () => {
     yaxis: {
       labels: {
         show: false,
-        formatter: value => `$${value.toLocaleString()}`,
+        formatter: value => `${value.toLocaleString()}`,
         style: {
           colors: rgbaToHex(`rgb(${theme.mainColorChannels[_mode]} / 0.7)`)
         }

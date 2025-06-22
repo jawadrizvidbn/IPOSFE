@@ -18,6 +18,8 @@ import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReports
 import { thunkStatus } from '@/utils/statusHandler'
 import AcrossReportFilters from './AcrossReportFilters'
 import RetailWholeSaleFilters from './RetailWholeSaleFilters'
+import ColumnFilter from './ColumnFilter'
+import { removeKeys } from '@/utils'
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -32,7 +34,9 @@ const AllDataAccrossRecords = () => {
   const [endDate, setEndDate] = useState(null)
   const [filters, setFilters] = useState({})
   const [retailFilters, setRetailFilters] = useState([])
+  const [visibleStores, setVisibleStores] = useState([])
   const [filteredReportData, setFilteredReportData] = useState([])
+  const [isRetailDetailedReport, setIsRetailDetailedReport] = useState()
   const dispatch = useDispatch()
   const isLoading = useSelector(state => state.acrossReports.getAcrossReportStatus === thunkStatus.LOADING)
   const reportData = useSelector(state => state.acrossReports.reportData)
@@ -47,6 +51,11 @@ const AllDataAccrossRecords = () => {
   const reportType = useSelector(state => state.acrossReports.reportType) || reportTypeFromSearch
   const storeFields = useSelector(state => state.acrossReports.storeFields)
 
+  useEffect(() => {
+    return () => {
+      dispatch(cleanReportData())
+    }
+  }, [])
   useEffect(() => {
     if (!reportData || reportData.length === 0) {
       setFilteredReportData([])
@@ -82,25 +91,23 @@ const AllDataAccrossRecords = () => {
     })
 
     setFilteredReportData(filtered)
-
-    return () => {
-      dispatch(cleanReportData())
-    }
   }, [reportData, filters, storeFields])
 
   useEffect(() => {
-    // 1) No filters or both “retail”+“wholesale” → show everything
     if (retailFilters.length === 0 || (retailFilters.includes('retail') && retailFilters.includes('wholesale'))) {
       setFilteredReportData(reportData)
       return
     }
 
-    // 2) Otherwise, for each item grab all the keys ending in “Type”
-    //    and require _every_ one of them to be in retailFilters
-    const filtered = reportData.filter(item => {
-      const typeKeys = Object.keys(item).filter(key => key.toLowerCase().endsWith('type'))
-      return typeKeys.every(key => retailFilters.includes(item[key]))
-    })
+    let keysToRemove = []
+    // console.log(retailFilters)
+    if (retailFilters.length === 1 && retailFilters.includes('retail')) {
+      keysToRemove = Object.keys(reportData[0] || {}).filter(key => key.toLowerCase().includes('wholesale'))
+    } else if (retailFilters.length === 1 && retailFilters.includes('wholesale')) {
+      keysToRemove = Object.keys(reportData[0] || {}).filter(key => key.toLowerCase().includes('retail'))
+    }
+
+    const filtered = reportData.map(item => removeKeys(item, keysToRemove))
 
     setFilteredReportData(filtered)
   }, [retailFilters, reportData])
@@ -159,9 +166,17 @@ const AllDataAccrossRecords = () => {
       }
     })
   }
+  const generateReport = (isRetailDetailed = false) => {
+    dispatch(
+      getAcrossReport({
+        params: { startDate, endDate, shopKeys, reportType, isDetailed: isRetailDetailed }
+      })
+    )
+  }
 
-  const generateReport = () => {
-    dispatch(getAcrossReport({ params: { startDate, endDate, shopKeys, reportType } }))
+  const handleRetailDetailedReportChange = value => {
+    setIsRetailDetailedReport(value)
+    generateReport(value)
   }
 
   const handleExport = type => {
@@ -201,30 +216,34 @@ const AllDataAccrossRecords = () => {
       <div className='p-6'>
         <div className='flex flex-col items-center'>
           <div className='flex-1 flex items-end h-[120px] gap-4 mb-5'>
-            <div className='flex-1'>
-              <label htmlFor='start' className='form-label  font-semibold block mb-2'>
-                <b>Start Date:</b>
-              </label>
-              <DatePicker
-                selected={startDate}
-                onChange={date => setStartDate(date)}
-                dateFormat='yyyy-MM-dd'
-                placeholderText='YYYY-MM-DD'
-                className='form-control p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full'
-              />
-            </div>
-            <div className='flex-1'>
-              <label htmlFor='end' className='form-label  font-semibold block mb-2'>
-                <b>End Date:</b>
-              </label>
-              <DatePicker
-                selected={endDate}
-                onChange={date => setEndDate(date)}
-                dateFormat='yyyy-MM-dd'
-                placeholderText='YYYY-MM-DD'
-                className='form-control p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full'
-              />
-            </div>
+            {reportType === REPORT_TYPE_VALUES.stockOnHand ? null : (
+              <>
+                <div className='flex-1'>
+                  <label htmlFor='start' className='form-label  font-semibold block mb-2'>
+                    <b>Start Date:</b>
+                  </label>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={date => setStartDate(date)}
+                    dateFormat='yyyy-MM-dd'
+                    placeholderText='YYYY-MM-DD'
+                    className='form-control p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full'
+                  />
+                </div>
+                <div className='flex-1'>
+                  <label htmlFor='end' className='form-label  font-semibold block mb-2'>
+                    <b>End Date:</b>
+                  </label>
+                  <DatePicker
+                    selected={endDate}
+                    onChange={date => setEndDate(date)}
+                    dateFormat='yyyy-MM-dd'
+                    placeholderText='YYYY-MM-DD'
+                    className='form-control p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full'
+                  />
+                </div>
+              </>
+            )}
             <Button
               variant='contained'
               color='primary'
@@ -263,11 +282,21 @@ const AllDataAccrossRecords = () => {
           filters={filters}
           handleFilterChange={handleFilterChange}
           handleFilterDelete={handleFilterDelete}
+          setFilters={setFilters}
         />
       )}
 
-      {reportType === REPORT_TYPE_VALUES.retailWholesale && (
-        <RetailWholeSaleFilters value={retailFilters} onChange={handleRetailFilterChange} />
+      {reportType === REPORT_TYPE_VALUES.retailWholesale && reportData.length > 0 && (
+        <RetailWholeSaleFilters
+          value={retailFilters}
+          onChange={handleRetailFilterChange}
+          setIsRetailDetailedReport={handleRetailDetailedReportChange}
+          isRetailDetailedReport={isRetailDetailedReport}
+        />
+      )}
+
+      {[REPORT_TYPE_VALUES.quantitySold, REPORT_TYPE_VALUES.products].includes(reportType) && reportData.length > 0 && (
+        <ColumnFilter reportData={reportData} setFilteredReportData={setFilteredReportData} />
       )}
 
       {reportData.length > 0 && (

@@ -16,6 +16,7 @@ const initialState = {
 
 export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport', async ({ params }, { dispatch }) => {
   let response
+
   switch (params.reportType) {
     case REPORT_TYPE_VALUES.quantitySold:
       response = await databaseService.accrossShopReport(params)
@@ -24,7 +25,7 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
       dispatch(setGrandTotal(response.data.grandTotalQty || 0))
       break
     case REPORT_TYPE_VALUES.turnover:
-      response = await dashboardService.getTopStores(params, { shopKeys: params.shopKeys?.split?.(',') })
+      response = await dashboardService.getTopStores(params, { shopKeys: params.shopKeys?.split?.(','), isAll: true })
       dispatch(setReportData(response.data?.data?.byTurnover || []))
       dispatch(setSortableKeys(response.data?.data?.sortableKeys || []))
       dispatch(setStoreFields(response.data?.data?.storeFields || []))
@@ -38,6 +39,12 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
       break
     case REPORT_TYPE_VALUES.retailWholesale:
       response = await databaseService.acrossShopRetailWholesale(params)
+      dispatch(setReportData(response.data?.data || []))
+      dispatch(setSortableKeys(response.data?.sortableKeys || []))
+      dispatch(setGrandTotal(null))
+      break
+    case REPORT_TYPE_VALUES.stockOnHand:
+      response = await databaseService.acrossShopStockOnHand(params)
       dispatch(setReportData(response.data?.data || []))
       dispatch(setSortableKeys(response.data?.sortableKeys || []))
       dispatch(setGrandTotal(null))

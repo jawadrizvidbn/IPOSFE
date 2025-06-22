@@ -12,10 +12,13 @@ const acrossShopProducts = async params => axiosInstance.get(`${BASE_URL}/across
 
 const acrossShopRetailWholesale = async params =>
   axiosInstance.get(`${BASE_URL}/acrossRetailWholesaleByProductReport`, { params })
+
+const acrossShopStockOnHand = async params => axiosInstance.get(`${BASE_URL}/acrossStockOnHandReport`, { params })
 export default {
   connectNewServer,
   getAllShop,
   accrossShopReport,
   acrossShopProducts,
-  acrossShopRetailWholesale
+  acrossShopRetailWholesale,
+  acrossShopStockOnHand
 }

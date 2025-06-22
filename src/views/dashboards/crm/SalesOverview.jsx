@@ -195,7 +195,7 @@ const CardWidgetsSalesOverview = () => {
                 </CustomAvatar>
                 <div className='flex flex-col'>
                   <Typography>Number of Sales</Typography>
-                  <Typography variant='h5'>${grandTotal.toLocaleString()}</Typography>
+                  <Typography variant='h5'>{grandTotal.toLocaleString()}</Typography>
                 </div>
               </div>
               <Divider className='mlb-6' />
@@ -209,7 +209,7 @@ const CardWidgetsSalesOverview = () => {
                         </div>
                         <Typography>{product.stockdescription || 'Unknown Product'}</Typography>
                       </div>
-                      <Typography className='font-medium'>${(product.totalSales || 0).toLocaleString()}</Typography>
+                      <Typography className='font-medium'>{(product.totalSales || 0).toLocaleString()}</Typography>
                     </Grid>
                   ))}
                 </Grid>

@@ -20,9 +20,9 @@ import { CircularProgress } from '@mui/material'
 
 // Helper to format large numbers as “$123K” / “$1.2M” etc.
 const formatCurrency = num => {
-  if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`
-  if (num >= 1_000) return `$${(num / 1_000).toFixed(1)}K`
-  return `$${num.toFixed(2)}`
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
+  return `${num.toFixed(2)}`
 }
 
 const TopTurnoverCard = ({}) => {

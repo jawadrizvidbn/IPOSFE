@@ -57,12 +57,12 @@ const TopTransactionsCard = ({}) => {
 
                     {/* Avg / Transaction */}
                     <Typography variant='body2' color='textSecondary'>
-                      Avg/Txn: ${shop.avgPerTransaction.toFixed(2)}
+                      Avg/Txn: {shop.avgPerTransaction.toFixed(2)}
                     </Typography>
 
                     {/* Optionally: show revenue as a tag */}
                     <Typography variant='caption' className='mt-1' color='textSecondary'>
-                      Revenue: ${shop.totalSelling.toLocaleString()}
+                      Revenue: {shop.totalSelling.toLocaleString()}
                     </Typography>
                   </div>
                 </div>

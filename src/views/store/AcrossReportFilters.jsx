@@ -13,7 +13,7 @@ import {
   Box,
   TextField
 } from '@mui/material'
-function AcrossReportFilters({ filterOptions, filters, handleFilterChange, handleFilterDelete }) {
+function AcrossReportFilters({ filterOptions, filters, handleFilterChange, handleFilterDelete, setFilters }) {
   return (
     <div className='mb-6 p-4 border rounded-md '>
       <h3 className='text-lg font-semibold mb-3'>Filters</h3>
