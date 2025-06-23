@@ -18,8 +18,9 @@ import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReports
 import { thunkStatus } from '@/utils/statusHandler'
 import AcrossReportFilters from './AcrossReportFilters'
 import RetailWholeSaleFilters from './RetailWholeSaleFilters'
+import StockOnHandFilters from './StockOnHandFilters'
 import ColumnFilter from './ColumnFilter'
-import { removeKeys } from '@/utils'
+import { removeKeys, sum } from '@/utils'
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -34,6 +35,7 @@ const AllDataAccrossRecords = () => {
   const [endDate, setEndDate] = useState(null)
   const [filters, setFilters] = useState({})
   const [retailFilters, setRetailFilters] = useState([])
+  const [stockOnHandFilters, setStockOnHandFilters] = useState([])
   const [visibleStores, setVisibleStores] = useState([])
   const [filteredReportData, setFilteredReportData] = useState([])
   const [isRetailDetailedReport, setIsRetailDetailedReport] = useState()
@@ -56,6 +58,7 @@ const AllDataAccrossRecords = () => {
       dispatch(cleanReportData())
     }
   }, [])
+
   useEffect(() => {
     if (!reportData || reportData.length === 0) {
       setFilteredReportData([])
@@ -100,7 +103,7 @@ const AllDataAccrossRecords = () => {
     }
 
     let keysToRemove = []
-    // console.log(retailFilters)
+
     if (retailFilters.length === 1 && retailFilters.includes('retail')) {
       keysToRemove = Object.keys(reportData[0] || {}).filter(key => key.toLowerCase().includes('wholesale'))
     } else if (retailFilters.length === 1 && retailFilters.includes('wholesale')) {
@@ -111,6 +114,41 @@ const AllDataAccrossRecords = () => {
 
     setFilteredReportData(filtered)
   }, [retailFilters, reportData])
+
+  useEffect(() => {
+    if (stockOnHandFilters.length === 0) {
+      setFilteredReportData(reportData)
+      return
+    }
+
+    let keysToRemove = []
+
+    if (stockOnHandFilters.includes('stockOnHand')) {
+      keysToRemove = [
+        ...keysToRemove,
+        ...Object.keys(reportData[0] || {}).filter(key => key.toLowerCase().includes('stock on hand'))
+      ]
+    }
+    if (stockOnHandFilters.includes('productPrices')) {
+      keysToRemove = [
+        ...keysToRemove,
+        ...Object.keys(reportData[0] || {}).filter(
+          key => key.toLowerCase().includes('cost price') || key.toLowerCase().includes('selling price')
+        )
+      ]
+    }
+    if (stockOnHandFilters.includes('totalPrices')) {
+      keysToRemove = [
+        ...keysToRemove,
+        ...Object.keys(reportData[0] || {}).filter(
+          key => key.toLowerCase().includes('total cost') || key.toLowerCase().includes('total selling')
+        )
+      ]
+    }
+
+    const filtered = reportData.map(item => removeKeys(item, keysToRemove))
+    setFilteredReportData(filtered)
+  }, [stockOnHandFilters, reportData])
 
   const filterOptions = useMemo(() => {
     if (!storeFields || storeFields.length === 0) return {}
@@ -166,6 +204,16 @@ const AllDataAccrossRecords = () => {
       }
     })
   }
+
+  const handleStockOnHandFilterChange = (name, value) => {
+    setStockOnHandFilters(prev => {
+      if (value) {
+        return [...prev, name]
+      } else {
+        return prev.filter(item => item !== name)
+      }
+    })
+  }
   const generateReport = (isRetailDetailed = false) => {
     dispatch(
       getAcrossReport({
@@ -203,6 +251,29 @@ const AllDataAccrossRecords = () => {
         break
     }
   }
+
+  const dataSource = useMemo(() => {
+    let finalData = []
+    if (filteredReportData.length === 0) finalData = reportData
+    if (filteredReportData.length > 0) {
+      finalData = filteredReportData
+    }
+
+    if (reportType === REPORT_TYPE_VALUES.turnover && Array.isArray(finalData)) {
+      finalData = [
+        ...finalData,
+        {
+          shopKey: 'Grand Total',
+          avgPerTransaction: sum(finalData.map(item => item.avgPerTransaction)),
+          profit: sum(finalData.map(item => item.profit)),
+          totalCost: sum(finalData.map(item => item.totalCost)),
+          totalSelling: sum(finalData.map(item => item.totalSelling)),
+          totalTransactions: sum(finalData.map(item => item.totalTransactions))
+        }
+      ]
+    }
+    return finalData
+  }, [filteredReportData, reportData])
 
   return (
     <Card className='p-4' ref={containerRef} id='main'>
@@ -247,7 +318,7 @@ const AllDataAccrossRecords = () => {
             <Button
               variant='contained'
               color='primary'
-              onClick={generateReport}
+              onClick={() => generateReport()}
               disabled={isLoading}
               className='min-w-[120px]'
             >
@@ -299,10 +370,14 @@ const AllDataAccrossRecords = () => {
         <ColumnFilter reportData={reportData} setFilteredReportData={setFilteredReportData} />
       )}
 
+      {reportType === REPORT_TYPE_VALUES.stockOnHand && reportData.length > 0 && (
+        <StockOnHandFilters value={stockOnHandFilters} onChange={handleStockOnHandFilterChange} />
+      )}
+
       {reportData.length > 0 && (
         <SortableTable
           grandTotal={grandTotal}
-          reportData={filteredReportData.length > 0 ? filteredReportData : reportData}
+          reportData={dataSource}
           reportType={reportType}
           sortableColumns={sortableKeys}
         />
