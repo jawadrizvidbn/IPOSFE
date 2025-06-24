@@ -42,6 +42,20 @@ function StockOnHandFilters({ value = [], onChange }) {
           />
         </FormGroup>
       </FormControl>
+      <FormControl component='fieldset' sx={{ px: 2, py: 1 }}>
+        <FormGroup row>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.includes('excludeNegatives')}
+                onChange={e => onChange(e.target.name, e.target.checked)}
+                name='excludeNegatives'
+              />
+            }
+            label='Exclude Negatives'
+          />
+        </FormGroup>
+      </FormControl>
     </div>
   )
 }

@@ -20,7 +20,7 @@ import AcrossReportFilters from './AcrossReportFilters'
 import RetailWholeSaleFilters from './RetailWholeSaleFilters'
 import StockOnHandFilters from './StockOnHandFilters'
 import ColumnFilter from './ColumnFilter'
-import { removeKeys, sum } from '@/utils'
+import { removeKeys, sum, zeroTotals } from '@/utils'
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -146,7 +146,11 @@ const AllDataAccrossRecords = () => {
       ]
     }
 
-    const filtered = reportData.map(item => removeKeys(item, keysToRemove))
+    console.log(stockOnHandFilters, 'stockOnHandFilters')
+    let filtered = reportData.map(item => removeKeys(item, keysToRemove))
+    if (stockOnHandFilters.includes('excludeNegatives')) {
+      filtered = zeroTotals(filtered)
+    }
     setFilteredReportData(filtered)
   }, [stockOnHandFilters, reportData])
 
