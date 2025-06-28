@@ -6,6 +6,22 @@ const FIXED_COLUMNS_CONFIG = {
   [REPORT_TYPE_VALUES.quantitySold]: {
     enabled: true,
     fixedColumnCount: 2
+  },
+  [REPORT_TYPE_VALUES.products]: {
+    enabled: true,
+    fixedColumnCount: 2
+  },
+  [REPORT_TYPE_VALUES.retailWholesale]: {
+    enabled: true,
+    fixedColumnCount: 2
+  },
+  [REPORT_TYPE_VALUES.stockOnHand]: {
+    enabled: true,
+    fixedColumnCount: 2
+  },
+  [REPORT_TYPE_VALUES.dailySales]: {
+    enabled: true,
+    fixedColumnCount: 1
   }
 }
 
@@ -20,7 +36,8 @@ export const SortableTable = ({ reportType, reportData, grandTotal, sortableColu
   const columns = displayKeys.map(key => ({
     key,
     label: formatColumnHeader(key),
-    sort: Array.isArray(sortableColumns) && sortableColumns.includes(key)
+    // sort: Array.isArray(sortableColumns) && sortableColumns.includes(key)
+    sort: true
   }))
 
   const fixedColumnsConfig = FIXED_COLUMNS_CONFIG[reportType]
@@ -41,7 +58,7 @@ export const SortableTable = ({ reportType, reportData, grandTotal, sortableColu
   // Calculate cumulative widths for sticky positioning
   const getLeftPosition = columnIndex => {
     // You might want to measure actual widths, but for now using estimated width
-    return columnIndex * 150 // Adjust based on your actual column widths
+    return columnIndex * 100 // Adjust based on your actual column widths
   }
 
   if (shouldUseFixedColumns) {

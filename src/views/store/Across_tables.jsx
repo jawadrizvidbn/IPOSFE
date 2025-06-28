@@ -21,6 +21,8 @@ import RetailWholeSaleFilters from './RetailWholeSaleFilters'
 import StockOnHandFilters from './StockOnHandFilters'
 import ColumnFilter from './ColumnFilter'
 import { removeKeys, sum, zeroTotals } from '@/utils'
+import 'react-datepicker/dist/react-datepicker.css'
+
 const columnHelper = createColumnHelper()
 
 const columns = [
@@ -29,6 +31,10 @@ const columns = [
     header: 'Name'
   })
 ]
+
+const MyCalendarContainer = ({ children }) => {
+  return <div style={{ zIndex: 1000 }}>{children}</div>
+}
 
 const AllDataAccrossRecords = () => {
   const [startDate, setStartDate] = useState(null)
@@ -146,7 +152,6 @@ const AllDataAccrossRecords = () => {
       ]
     }
 
-    console.log(stockOnHandFilters, 'stockOnHandFilters')
     let filtered = reportData.map(item => removeKeys(item, keysToRemove))
     if (stockOnHandFilters.includes('excludeNegatives')) {
       filtered = zeroTotals(filtered)
@@ -290,7 +295,7 @@ const AllDataAccrossRecords = () => {
       />
       <div className='p-6'>
         <div className='flex flex-col items-center'>
-          <div className='flex-1 flex items-end h-[120px] gap-4 mb-5'>
+          <div className='flex-1 flex items-end gap-4 mb-5'>
             {reportType === REPORT_TYPE_VALUES.stockOnHand ? null : (
               <>
                 <div className='flex-1'>
@@ -299,6 +304,7 @@ const AllDataAccrossRecords = () => {
                   </label>
                   <DatePicker
                     selected={startDate}
+                    popperClassName='react-datepicker-popper'
                     onChange={date => setStartDate(date)}
                     dateFormat='yyyy-MM-dd'
                     placeholderText='YYYY-MM-DD'
@@ -311,6 +317,7 @@ const AllDataAccrossRecords = () => {
                   </label>
                   <DatePicker
                     selected={endDate}
+                    popperClassName='react-datepicker-popper'
                     onChange={date => setEndDate(date)}
                     dateFormat='yyyy-MM-dd'
                     placeholderText='YYYY-MM-DD'

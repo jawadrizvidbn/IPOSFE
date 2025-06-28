@@ -4,7 +4,8 @@ export const REPORT_TYPE_VALUES = {
   turnover: 'turnover',
   products: 'products',
   retailWholesale: 'retailWholesale',
-  stockOnHand: 'stockOnHand'
+  stockOnHand: 'stockOnHand',
+  dailySales: 'dailySales'
 }
 
 export const REPORT_TYPES = [
@@ -12,7 +13,8 @@ export const REPORT_TYPES = [
   { value: 'turnover', label: 'Turnover Report' },
   { value: 'products', label: 'Products Report' },
   { value: 'retailWholesale', label: 'Retail / Wholesale Report' },
-  { value: 'stockOnHand', label: 'Stock On Hand Report' }
+  { value: 'stockOnHand', label: 'Stock On Hand Report' },
+  { value: 'dailySales', label: 'Daily Sales Report' }
   // { value: 'stock', label: 'Stock Report' },
   // { value: 'inventory', label: 'Inventory Report' },
   // { value: 'price', label: 'Price Change Report' },
@@ -26,7 +28,8 @@ export const getReportTypeLabel = type => {
     products: 'Products Report',
     retailWholesale: 'Retail / Wholesale Report',
     quantitySold: 'Quantity Sold Report',
-    stockOnHand: 'Stock On Hand Report'
+    stockOnHand: 'Stock On Hand Report',
+    dailySales: 'Daily Sales Report'
     // sales: 'Sales Report',
     // inventory: 'Inventory Report',
     // price: 'Price Change Report',
