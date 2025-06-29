@@ -329,7 +329,7 @@ const AllDataAccrossRecords = () => {
             <Button
               variant='contained'
               color='primary'
-              onClick={() => generateReport()}
+              onClick={() => generateReport(isRetailDetailedReport)}
               disabled={isLoading}
               className='min-w-[120px]'
             >
@@ -368,14 +368,16 @@ const AllDataAccrossRecords = () => {
         />
       )}
 
-      {reportType === REPORT_TYPE_VALUES.retailWholesale && reportData.length > 0 && (
-        <RetailWholeSaleFilters
-          value={retailFilters}
-          onChange={handleRetailFilterChange}
-          setIsRetailDetailedReport={handleRetailDetailedReportChange}
-          isRetailDetailedReport={isRetailDetailedReport}
-        />
-      )}
+      {[REPORT_TYPE_VALUES.retailWholesale, REPORT_TYPE_VALUES.dailySales].includes(reportType) &&
+        reportData.length > 0 && (
+          <RetailWholeSaleFilters
+            value={retailFilters}
+            onChange={handleRetailFilterChange}
+            setIsRetailDetailedReport={handleRetailDetailedReportChange}
+            isRetailDetailedReport={isRetailDetailedReport}
+            showOnlyIsDetailFilter={reportType === REPORT_TYPE_VALUES.dailySales}
+          />
+        )}
 
       {[REPORT_TYPE_VALUES.quantitySold, REPORT_TYPE_VALUES.products].includes(reportType) && reportData.length > 0 && (
         <ColumnFilter reportData={reportData} setFilteredReportData={setFilteredReportData} />
