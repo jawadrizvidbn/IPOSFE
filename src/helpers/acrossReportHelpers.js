@@ -22,6 +22,10 @@ const FIXED_COLUMNS_CONFIG = {
   [REPORT_TYPE_VALUES.dailySales]: {
     enabled: true,
     fixedColumnCount: 1
+  },
+  [REPORT_TYPE_VALUES.invoice]: {
+    enabled: true,
+    fixedColumnCount: 1
   }
 }
 
@@ -63,7 +67,7 @@ export const SortableTable = ({ reportType, reportData, grandTotal, sortableColu
 
   if (shouldUseFixedColumns) {
     return (
-      <div className='relative overflow-x-auto max-h-[600px] overflow-y-auto'>
+      <div id='tableContainer' className='relative overflow-x-auto max-h-[600px] overflow-y-auto'>
         <table
           className='border border-gray-200'
           style={{
