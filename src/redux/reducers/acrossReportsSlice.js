@@ -49,7 +49,9 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
       dispatch(setGrandTotal(null))
       break
     case REPORT_TYPE_VALUES.retailWholesale:
-      response = await databaseService.acrossShopRetailWholesale(params)
+      startDate = format(params.startDate, 'yyyy-MM-dd')
+      endDate = format(params.endDate, 'yyyy-MM-dd')
+      response = await databaseService.acrossShopRetailWholesale({ ...params, startDate, endDate })
       dispatch(setReportData(response.data?.data || []))
       dispatch(setSortableKeys(response.data?.sortableKeys || []))
       dispatch(setGrandTotal(null))
