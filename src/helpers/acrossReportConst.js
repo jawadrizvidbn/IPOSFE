@@ -18,7 +18,7 @@ export const REPORT_TYPES = [
   { value: 'stockOnHand', label: 'Stock On Hand Report' },
   { value: 'dailySales', label: 'Daily Sales Report' },
   { value: 'invoice', label: 'Invoice Report' },
-  { value: 'retailWholesaleByCategory', label: 'Retail / Wholesale By Category Report' }
+  { value: 'retailWholesaleByCategory', label: 'Category Sales Report' }
   // { value: 'stock', label: 'Stock Report' },
   // { value: 'inventory', label: 'Inventory Report' },
   // { value: 'price', label: 'Price Change Report' },
