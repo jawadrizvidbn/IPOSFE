@@ -46,7 +46,11 @@ const AllDataAccrossRecords = () => {
     sub1: false,
     sub2: false,
     totalCost: false,
-    totalSelling: false
+    totalSelling: false,
+    retailCost: false,
+    retailSelling: false,
+    wholesaleCost: false,
+    wholesaleSelling: false
   })
   const [stockOnHandFilters, setStockOnHandFilters] = useState([])
   const [visibleStores, setVisibleStores] = useState([])
@@ -256,7 +260,11 @@ const AllDataAccrossRecords = () => {
           sub1: value.sub1,
           sub2: value.sub2,
           totalCost: value.totalCost,
-          totalSelling: value.totalSelling
+          totalSelling: value.totalSelling,
+          retailCost: value.retailCost,
+          retailSelling: value.retailSelling,
+          wholesaleCost: value.wholesaleCost,
+          wholesaleSelling: value.wholesaleSelling
         }
       })
     )

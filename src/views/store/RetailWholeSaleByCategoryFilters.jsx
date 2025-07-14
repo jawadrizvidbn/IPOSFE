@@ -47,6 +47,46 @@ function RetailWholeSaleByCategoryFilters({ value, onChange }) {
             }
             label='Total Selling'
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.retailCost}
+                onChange={e => onChange({ ...value, retailCost: e.target.checked })}
+                name='retailCost'
+              />
+            }
+            label='Retail Cost'
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.retailSelling}
+                onChange={e => onChange({ ...value, retailSelling: e.target.checked })}
+                name='retailSelling'
+              />
+            }
+            label='Retail Selling'
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.wholesaleCost}
+                onChange={e => onChange({ ...value, wholesaleCost: e.target.checked })}
+                name='wholesaleCost'
+              />
+            }
+            label='Wholesale Cost'
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.wholesaleSelling}
+                onChange={e => onChange({ ...value, wholesaleSelling: e.target.checked })}
+                name='wholesaleSelling'
+              />
+            }
+            label='Wholesale Selling'
+          />
         </FormGroup>
       </FormControl>
     </div>
