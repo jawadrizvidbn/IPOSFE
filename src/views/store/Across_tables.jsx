@@ -18,6 +18,7 @@ import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReports
 import { thunkStatus } from '@/utils/statusHandler'
 import AcrossReportFilters from './AcrossReportFilters'
 import RetailWholeSaleFilters from './RetailWholeSaleFilters'
+import RetailWholeSaleByCategoryFilters from './RetailWholeSaleByCategoryFilters'
 import StockOnHandFilters from './StockOnHandFilters'
 import ColumnFilter from './ColumnFilter'
 import { removeKeys, sum, zeroTotals } from '@/utils'
@@ -41,6 +42,10 @@ const AllDataAccrossRecords = () => {
   const [endDate, setEndDate] = useState(null)
   const [filters, setFilters] = useState({})
   const [retailFilters, setRetailFilters] = useState([])
+  const [retailWholesaleByCategoryFilters, setRetailWholesaleByCategoryFilters] = useState({
+    sub1: false,
+    sub2: false
+  })
   const [stockOnHandFilters, setStockOnHandFilters] = useState([])
   const [visibleStores, setVisibleStores] = useState([])
   const [filteredReportData, setFilteredReportData] = useState([])
@@ -236,6 +241,23 @@ const AllDataAccrossRecords = () => {
     generateReport(value)
   }
 
+  const handleRetailWholesaleByCategoryFilterChange = value => {
+    setRetailWholesaleByCategoryFilters(value)
+    dispatch(
+      getAcrossReport({
+        params: {
+          startDate,
+          endDate,
+          shopKeys,
+          reportType,
+          isDetailed: false,
+          sub1: value.sub1,
+          sub2: value.sub2
+        }
+      })
+    )
+  }
+
   const handleExport = type => {
     const table = document.querySelector('#tableContainer table')
     if (!table) return
@@ -378,6 +400,13 @@ const AllDataAccrossRecords = () => {
             showOnlyIsDetailFilter={reportType === REPORT_TYPE_VALUES.dailySales}
           />
         )}
+
+      {reportType === REPORT_TYPE_VALUES.retailWholesaleByCategory && reportData.length > 0 && (
+        <RetailWholeSaleByCategoryFilters
+          value={retailWholesaleByCategoryFilters}
+          onChange={handleRetailWholesaleByCategoryFilterChange}
+        />
+      )}
 
       {[REPORT_TYPE_VALUES.quantitySold, REPORT_TYPE_VALUES.products].includes(reportType) && reportData.length > 0 && (
         <ColumnFilter reportData={reportData} setFilteredReportData={setFilteredReportData} />
