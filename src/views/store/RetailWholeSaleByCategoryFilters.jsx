@@ -3,11 +3,8 @@ import { FormGroup, FormControlLabel, Checkbox, Typography, Box, FormControl } f
 
 function RetailWholeSaleByCategoryFilters({ value, onChange }) {
   return (
-    <div className='flex w-full'>
-      <FormControl component='fieldset' sx={{ width: 270, px: 2, py: 1 }}>
-        <Typography variant='subtitle1' gutterBottom>
-          Category Filter
-        </Typography>
+    <div className='flex'>
+      <FormControl className='w-full' component='fieldset' sx={{ width: 270, px: 2, py: 1 }}>
         <FormGroup row>
           <FormControlLabel
             control={
@@ -29,6 +26,26 @@ function RetailWholeSaleByCategoryFilters({ value, onChange }) {
               />
             }
             label='Sub 2'
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.totalCost}
+                onChange={e => onChange({ ...value, totalCost: e.target.checked })}
+                name='totalCost'
+              />
+            }
+            label='Total Cost'
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value.totalSelling}
+                onChange={e => onChange({ ...value, totalSelling: e.target.checked })}
+                name='totalSelling'
+              />
+            }
+            label='Total Selling'
           />
         </FormGroup>
       </FormControl>

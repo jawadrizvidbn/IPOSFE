@@ -44,7 +44,9 @@ const AllDataAccrossRecords = () => {
   const [retailFilters, setRetailFilters] = useState([])
   const [retailWholesaleByCategoryFilters, setRetailWholesaleByCategoryFilters] = useState({
     sub1: false,
-    sub2: false
+    sub2: false,
+    totalCost: false,
+    totalSelling: false
   })
   const [stockOnHandFilters, setStockOnHandFilters] = useState([])
   const [visibleStores, setVisibleStores] = useState([])
@@ -252,7 +254,9 @@ const AllDataAccrossRecords = () => {
           reportType,
           isDetailed: false,
           sub1: value.sub1,
-          sub2: value.sub2
+          sub2: value.sub2,
+          totalCost: value.totalCost,
+          totalSelling: value.totalSelling
         }
       })
     )
