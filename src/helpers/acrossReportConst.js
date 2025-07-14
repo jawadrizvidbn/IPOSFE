@@ -35,7 +35,7 @@ export const getReportTypeLabel = type => {
     stockOnHand: 'Stock On Hand Report',
     dailySales: 'Daily Sales Report',
     invoice: 'Invoice Report',
-    retailWholesaleByCategory: 'Retail / Wholesale By Category Report'
+    retailWholesaleByCategory: 'Category Sales Report'
     // sales: 'Sales Report',
     // inventory: 'Inventory Report',
     // price: 'Price Change Report',
