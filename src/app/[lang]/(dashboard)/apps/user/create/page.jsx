@@ -15,7 +15,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import CircularProgress from '@mui/material/CircularProgress'
-import { FormControl, InputLabel, Select } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, InputLabel, Select } from '@mui/material'
 
 // Third-party Imports
 import { toast } from 'react-toastify'
@@ -36,6 +36,7 @@ import { getAllPermissions } from '@/redux/reducers/permissionSlice'
 import { createUser } from '@/redux/reducers/authSlice'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { ROLE_TYPES } from '@/utils/contants'
+import { getReportTypeLabel, REPORT_TYPE_VALUES } from '@/helpers/acrossReportConst'
 
 const schema = object({
   name: string([minLength(3, 'Name must be at least 3 characters long')]),
@@ -52,7 +53,8 @@ const schema = object({
   allowedStores: array(string()),
   gracePeriod: string([minLength(1, 'This field is required')]),
   referenceNumber: string([minLength(11, 'Reference must be 3 letters + 8 digits')]),
-  role: string([minLength(1, 'This field is required')])
+  role: string([minLength(1, 'This field is required')]),
+  reportPermissions: optional(object({}))
 })
 
 const CreateUser = () => {
@@ -60,6 +62,7 @@ const CreateUser = () => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [isServerPasswordShown, setIsServerPasswordShown] = useState(false)
   const [selectedRole, setSelectedRole] = useState('')
+  const [reportPermissions, setReportPermissions] = useState({})
   // Redux
   const dispatch = useDispatch()
   const connectedServerStores = useSelector(state => state.database.connectedServerStores)
@@ -155,7 +158,7 @@ const CreateUser = () => {
     try {
       console.log('Inside try block, data:', data)
 
-      dispatch(createUser(data))
+      dispatch(createUser({ ...data, reportPermissions: reportPermissions }))
       // Reset form after successful submission
       reset()
       router.replace(getLocalizedUrl('apps/user/list'))
@@ -597,6 +600,50 @@ const CreateUser = () => {
                       </FormControl>
                     )}
                   />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CardHeader title='Report Permissions' sx={{ px: 0, pt: 3, pb: 0 }} />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Card variant='outlined' sx={{ p: 2 }}>
+                    <CardHeader
+                      title={getReportTypeLabel(REPORT_TYPE_VALUES.retailWholesaleByCategory)}
+                      sx={{ px: 0, pt: 3, pb: 3 }}
+                    />
+                    <CardContent>
+                      <Controller
+                        name={`totalsOnly`}
+                        control={control}
+                        rules={{ required: false }}
+                        render={({ field }) => (
+                          <FormControl fullWidth>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={
+                                    reportPermissions[REPORT_TYPE_VALUES.retailWholesaleByCategory]?.totalsOnly || false
+                                  }
+                                  onChange={e => {
+                                    setReportPermissions({
+                                      ...reportPermissions,
+                                      [REPORT_TYPE_VALUES.retailWholesaleByCategory]: {
+                                        totalsOnly: e.target.checked
+                                      }
+                                    })
+                                  }}
+                                  name='totalsOnly'
+                                />
+                              }
+                              label='Show Totals Only'
+                              sx={{ mr: 3 }}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
                 </Grid>
 
                 <Grid item xs={12}>

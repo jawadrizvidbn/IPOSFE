@@ -1,7 +1,13 @@
 import React from 'react'
 import { FormGroup, FormControlLabel, Checkbox, Typography, Box, FormControl } from '@mui/material'
+import { useSelector } from 'react-redux'
+import { REPORT_TYPE_VALUES } from '@/helpers/acrossReportConst'
 
 function RetailWholeSaleByCategoryFilters({ value, onChange }) {
+  const user = useSelector(state => state.auth.user)
+
+  const totalsOnly = user?.reportPermissions?.[REPORT_TYPE_VALUES.retailWholesaleByCategory]?.totalsOnly
+
   return (
     <div className='flex'>
       <FormControl className='w-full' component='fieldset' sx={{ width: 270, px: 2, py: 1 }}>
@@ -47,46 +53,50 @@ function RetailWholeSaleByCategoryFilters({ value, onChange }) {
             }
             label='Total Selling'
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value.retailCost}
-                onChange={e => onChange({ ...value, retailCost: e.target.checked })}
-                name='retailCost'
+          {!totalsOnly && (
+            <>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={value.retailCost}
+                    onChange={e => onChange({ ...value, retailCost: e.target.checked })}
+                    name='retailCost'
+                  />
+                }
+                label='Retail Cost'
               />
-            }
-            label='Retail Cost'
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value.retailSelling}
-                onChange={e => onChange({ ...value, retailSelling: e.target.checked })}
-                name='retailSelling'
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={value.retailSelling}
+                    onChange={e => onChange({ ...value, retailSelling: e.target.checked })}
+                    name='retailSelling'
+                  />
+                }
+                label='Retail Selling'
               />
-            }
-            label='Retail Selling'
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value.wholesaleCost}
-                onChange={e => onChange({ ...value, wholesaleCost: e.target.checked })}
-                name='wholesaleCost'
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={value.wholesaleCost}
+                    onChange={e => onChange({ ...value, wholesaleCost: e.target.checked })}
+                    name='wholesaleCost'
+                  />
+                }
+                label='Wholesale Cost'
               />
-            }
-            label='Wholesale Cost'
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value.wholesaleSelling}
-                onChange={e => onChange({ ...value, wholesaleSelling: e.target.checked })}
-                name='wholesaleSelling'
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={value.wholesaleSelling}
+                    onChange={e => onChange({ ...value, wholesaleSelling: e.target.checked })}
+                    name='wholesaleSelling'
+                  />
+                }
+                label='Wholesale Selling'
               />
-            }
-            label='Wholesale Selling'
-          />
+            </>
+          )}
         </FormGroup>
       </FormControl>
     </div>
