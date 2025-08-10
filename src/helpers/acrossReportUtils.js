@@ -46,6 +46,15 @@ export const getSortIcon = (columnKey, sortConfig) => {
   return sortConfig.direction === 'asc' ? '↑' : '↓'
 }
 
+function formatISOAsUTC(isoString, dateFormat = 'yyyy-MM-dd HH:mm:ss') {
+  const date = new Date(isoString)
+
+  // Create a UTC-adjusted Date object (neutralizing local timezone shift)
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+
+  return format(utcDate, dateFormat)
+}
+
 // Helper function to format cell values
 export const formatCellValue = value => {
   if (value === null || value === undefined) return '-'
@@ -57,7 +66,7 @@ export const formatCellValue = value => {
 
   // Format dates if they're in ISO format
   if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/)) {
-    return format(new Date(value), 'dd/MM/yyyy HH:mm:ss a')
+    return formatISOAsUTC(value)
   }
 
   return value

@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react'
 import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
 import { getReportTypeLabel, REPORT_TYPE_VALUES } from '@/helpers/acrossReportConst'
 import { SortableTable } from '@/helpers/acrossReportHelpers'
+import { SortableVirtualTable } from '@/helpers/acrossReportVirtualHelpers'
 import { cleanReportData, getAcrossReport } from '@/redux/reducers/acrossReportsSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 import AcrossReportFilters from './AcrossReportFilters'
@@ -429,12 +430,23 @@ const AllDataAccrossRecords = () => {
       )}
 
       {reportData.length > 0 && (
-        <SortableTable
-          grandTotal={grandTotal}
-          reportData={dataSource}
-          reportType={reportType}
-          sortableColumns={sortableKeys}
-        />
+        <>
+          {[REPORT_TYPE_VALUES.invoice, REPORT_TYPE_VALUES.stockOnHand].includes(reportType) ? (
+            <SortableVirtualTable
+              grandTotal={grandTotal}
+              reportData={dataSource}
+              reportType={reportType}
+              sortableColumns={sortableKeys}
+            />
+          ) : (
+            <SortableTable
+              grandTotal={grandTotal}
+              reportData={dataSource}
+              reportType={reportType}
+              sortableColumns={sortableKeys}
+            />
+          )}
+        </>
       )}
     </Card>
   )

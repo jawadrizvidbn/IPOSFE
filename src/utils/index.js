@@ -26,3 +26,18 @@ export function zeroTotals(data) {
     )
   )
 }
+
+export function chunkArray(array, size) {
+  if (!Array.isArray(array)) {
+    throw new TypeError('Expected an array')
+  }
+  if (size <= 0) {
+    throw new RangeError('Chunk size must be greater than 0')
+  }
+
+  const chunks = []
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size))
+  }
+  return chunks
+}

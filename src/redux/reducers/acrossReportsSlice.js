@@ -4,6 +4,7 @@ import { thunkStatus } from '@/utils/statusHandler'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { REPORT_TYPE_VALUES } from '../../helpers/acrossReportConst'
 import { format } from 'date-fns'
+import { chunkArray } from '@/utils'
 
 const name = 'acrossReports'
 const initialState = {
@@ -19,6 +20,7 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
   let response
   let startDate = ''
   let endDate = ''
+  const shopKeysArr = params.shopKeys?.split?.(',')
   switch (params.reportType) {
     case REPORT_TYPE_VALUES.quantitySold:
       response = await databaseService.accrossShopReport(params)
@@ -73,10 +75,32 @@ export const getAcrossReport = createAsyncThunk('acrossReports/getAcrossReport',
     case REPORT_TYPE_VALUES.invoice:
       startDate = format(params.startDate, 'yyyy-MM-dd')
       endDate = format(params.endDate, 'yyyy-MM-dd')
-      response = await databaseService.acrossInvoiceReport({ ...params, startDate, endDate })
-      dispatch(setReportData(response.data?.data || []))
-      dispatch(setSortableKeys(response.data?.sortableKeys || []))
-      dispatch(setGrandTotal(null))
+
+      if (shopKeysArr.length > 5) {
+        let reportData = []
+        let count = 1
+        const chunks = chunkArray(shopKeysArr, 5)
+        for (let chunk of chunks) {
+          const response = await databaseService.acrossInvoiceReport({
+            ...params,
+            startDate,
+            endDate,
+            shopKeys: chunk.join(',')
+          })
+          reportData = [...reportData, ...response.data?.data]
+          console.log('size', reportData.length)
+          console.log(`${count} of ${chunks.length}`)
+          count++
+        }
+        dispatch(setReportData(reportData))
+        dispatch(setSortableKeys([]))
+        dispatch(setGrandTotal(null))
+      } else {
+        response = await databaseService.acrossInvoiceReport({ ...params, startDate, endDate })
+        dispatch(setReportData(response.data?.data || []))
+        dispatch(setSortableKeys(response.data?.sortableKeys || []))
+        dispatch(setGrandTotal(null))
+      }
       break
     case REPORT_TYPE_VALUES.retailWholesaleByCategory:
       startDate = format(params.startDate, 'yyyy-MM-dd')
