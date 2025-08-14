@@ -8,7 +8,8 @@ module.exports = {
       cwd: 'C:\\Users\\IPOS\\Documents\\IPOSFE',
 
       // Run your package.json "start" script
-      script: 'npm',
+      interpreter: 'none',
+      script: 'npm.cmd',
       args: 'run start',
 
       // Process settings
