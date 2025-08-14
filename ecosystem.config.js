@@ -1,32 +1,19 @@
-// ecosystem.config.js
 module.exports = {
   apps: [
     {
       name: 'ipos-fe',
+      cwd: 'C:/Users/IPOS/Documents/IPOSFE',
 
-      // 👇 change this to your real project path
-      cwd: 'C:\\Users\\IPOS\\Documents\\IPOSFE',
+      // Run npm via Windows shell to avoid npm.cmd parsing issues
+      script: 'cmd',
+      args: '/c npm run start',
 
-      // Run your package.json "start" script
       interpreter: 'none',
-      script: 'npm.cmd',
-      args: 'run start',
-
-      // Process settings
       exec_mode: 'fork',
       instances: 1,
       autorestart: true,
       watch: false,
-      max_restarts: 10,
-      restart_delay: 5000,
-
-      // Environment (your start script already hardcodes -H and -p)
-      env: {
-        NODE_ENV: 'production'
-      },
-
-      // Logs (optional)
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
+      env: { NODE_ENV: 'production' }
     }
   ]
 }
