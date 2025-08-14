@@ -25,9 +25,6 @@ module.exports = {
       },
 
       // Logs (optional)
-      out_file: './logs/pm2-out.log',
-      error_file: './logs/pm2-err.log',
-      merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
     }
   ]
