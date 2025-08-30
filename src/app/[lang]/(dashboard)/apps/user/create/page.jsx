@@ -21,7 +21,7 @@ import { Checkbox, FormControl, FormControlLabel, InputLabel, Select } from '@mu
 import { toast } from 'react-toastify'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { email, object, minLength, string, number, array } from 'valibot'
+import { email, object, minLength, string, number, array, optional } from 'valibot'
 import { useRouter } from 'next/navigation'
 
 // Redux Imports
