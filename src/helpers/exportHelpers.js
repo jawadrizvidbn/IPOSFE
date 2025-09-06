@@ -101,3 +101,125 @@ export const generatePDF = async containerRef => {
     console.error('Error generating PDF:', error)
   }
 }
+
+// Data-source-based export functions
+export const exportCSVFromData = (data, filename = 'Price-Change-Report.csv', grandTotal = null) => {
+  if (!data || data.length === 0) {
+    console.warn('No data to export')
+    return
+  }
+
+  // Get column headers from the first data item
+  const headers = Object.keys(data[0])
+
+  // Create CSV header row
+  let csv = headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',') + '\n'
+
+  // Add data rows
+  data.forEach(row => {
+    const values = headers.map(header => {
+      const value = row[header]
+      // Handle null/undefined values
+      const stringValue = value === null || value === undefined ? '' : String(value)
+      return `"${stringValue.replace(/"/g, '""')}"`
+    })
+    csv += values.join(',') + '\n'
+  })
+
+  // Add footer row with totals if grandTotal exists
+  if (grandTotal !== undefined && grandTotal !== null) {
+    const footerRow = headers.map(header => {
+      if (header.trim() === 'stockcode') {
+        return '"Total Qty"'
+      } else if (header.trim() === 'totalQty') {
+        return `"${grandTotal}"`
+      } else {
+        return '""'
+      }
+    })
+    csv += footerRow.join(',') + '\n'
+  }
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  link.click()
+}
+
+export const copyToClipboardFromData = (data, grandTotal = null) => {
+  if (!data || data.length === 0) {
+    console.warn('No data to copy')
+    return
+  }
+
+  // Get column headers from the first data item
+  const headers = Object.keys(data[0])
+
+  // Create TSV header row
+  let tsv = headers.map(header => `"${header.replace(/"/g, '""')}"`).join('\t') + '\n'
+
+  // Add data rows
+  data.forEach(row => {
+    const values = headers.map(header => {
+      const value = row[header]
+      const stringValue = value === null || value === undefined ? '' : String(value)
+      return `"${stringValue.replace(/"/g, '""')}"`
+    })
+    tsv += values.join('\t') + '\n'
+  })
+
+  // Add footer row with totals if grandTotal exists
+  if (grandTotal !== undefined && grandTotal !== null) {
+    const footerRow = headers.map(header => {
+      if (header.trim() === 'stockcode') {
+        return '"Total Qty"'
+      } else if (header.trim() === 'totalQty') {
+        return `"${grandTotal}"`
+      } else {
+        return '""'
+      }
+    })
+    tsv += footerRow.join('\t') + '\n'
+  }
+
+  navigator.clipboard.writeText(tsv).catch(err => {
+    console.error('Failed to copy data: ', err)
+  })
+}
+
+export const exportExcelFromData = (data, filename = 'Price-Change-Report.xlsx', grandTotal = null) => {
+  if (!data || data.length === 0) {
+    console.warn('No data to export')
+    return
+  }
+
+  // Get column headers from the first data item
+  const headers = Object.keys(data[0])
+
+  // Prepare data for Excel export
+  const excelData = [
+    headers, // Header row
+    ...data.map(row => headers.map(header => row[header] || '')) // Data rows
+  ]
+
+  // Add footer row with totals if grandTotal exists
+  if (grandTotal !== undefined && grandTotal !== null) {
+    const footerRow = headers.map(header => {
+      if (header.trim() === 'stockcode') {
+        return 'Total Qty'
+      } else if (header.trim() === 'totalQty') {
+        return grandTotal
+      } else {
+        return ''
+      }
+    })
+    excelData.push(footerRow)
+  }
+
+  // Create worksheet
+  const ws = XLSX.utils.aoa_to_sheet(excelData)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+  XLSX.writeFile(wb, filename)
+}

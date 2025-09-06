@@ -201,15 +201,41 @@ const Across_Report = () => {
   }
 
   const exportCSV = () => {
-    const table = document.querySelector('#tableContainer table')
-    let csv = ''
+    console.log(filteredData, 'filteredData')
+    if (!filteredData || filteredData.length === 0) {
+      console.warn('No data to export')
+      return
+    }
 
-    for (let row of table.rows) {
-      const cells = Array.from(row.cells)
-        .map(cell => `"${cell.textContent.replace(/"/g, '""')}"`)
-        .join(',')
+    // Get column headers from the first data item
+    const headers = Object.keys(filteredData[0])
 
-      csv += cells + '\n'
+    // Create CSV header row
+    let csv = headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',') + '\n'
+
+    // Add data rows
+    filteredData.forEach(row => {
+      const values = headers.map(header => {
+        const value = row[header]
+        // Handle null/undefined values
+        const stringValue = value === null || value === undefined ? '' : String(value)
+        return `"${stringValue.replace(/"/g, '""')}"`
+      })
+      csv += values.join(',') + '\n'
+    })
+
+    // Add footer row with totals if grandTotal exists
+    if (grandTotal !== undefined && grandTotal !== null) {
+      const footerRow = headers.map(header => {
+        if (header.trim() === 'stockcode') {
+          return '"Total Qty"'
+        } else if (header.trim() === 'totalQty') {
+          return `"${grandTotal}"`
+        } else {
+          return '""'
+        }
+      })
+      csv += footerRow.join(',') + '\n'
     }
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })

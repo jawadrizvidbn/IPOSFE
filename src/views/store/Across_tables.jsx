@@ -11,7 +11,15 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
-import { copyToClipboard, exportCSV, exportExcel, printDocument, generatePDF } from '@/helpers/exportHelpers'
+import {
+  copyToClipboard,
+  exportCSV,
+  exportExcel,
+  printDocument,
+  generatePDF,
+  exportCSVFromData,
+  exportExcelFromData
+} from '@/helpers/exportHelpers'
 import { getReportTypeLabel, REPORT_TYPE_VALUES } from '@/helpers/acrossReportConst'
 import { SortableTable } from '@/helpers/acrossReportHelpers'
 import { SortableVirtualTable } from '@/helpers/acrossReportVirtualHelpers'
@@ -271,31 +279,6 @@ const AllDataAccrossRecords = () => {
     )
   }
 
-  const handleExport = type => {
-    const table = document.querySelector('#tableContainer table')
-    if (!table) return
-
-    switch (type) {
-      case 'copy':
-        copyToClipboard(table)
-        break
-      case 'csv':
-        exportCSV(table)
-        break
-      case 'excel':
-        exportExcel(table)
-        break
-      case 'pdf':
-        generatePDF(containerRef)
-        break
-      case 'print':
-        printDocument()
-        break
-      default:
-        break
-    }
-  }
-
   const dataSource = useMemo(() => {
     let finalData = []
     if (filteredReportData.length === 0) finalData = reportData
@@ -318,6 +301,31 @@ const AllDataAccrossRecords = () => {
     }
     return finalData
   }, [filteredReportData, reportData])
+
+  const handleExport = type => {
+    const table = document.querySelector('#tableContainer table')
+    if (!table) return
+
+    switch (type) {
+      case 'copy':
+        copyToClipboard(table)
+        break
+      case 'csv':
+        exportCSVFromData(dataSource)
+        break
+      case 'excel':
+        exportExcelFromData(dataSource)
+        break
+      case 'pdf':
+        generatePDF(containerRef)
+        break
+      case 'print':
+        printDocument()
+        break
+      default:
+        break
+    }
+  }
 
   return (
     <Card className='p-4' ref={containerRef} id='main'>
@@ -373,21 +381,21 @@ const AllDataAccrossRecords = () => {
           </div>
           <div className='flex items-center gap-4'>
             <div className='flex gap-2' id='ActionsButtons'>
-              <Button variant='outlined' onClick={() => handleExport('copy')} className='min-w-[80px]'>
+              {/* <Button variant='outlined' onClick={() => handleExport('copy')} className='min-w-[80px]'>
                 Copy
-              </Button>
+              </Button> */}
               <Button variant='outlined' onClick={() => handleExport('csv')} className='min-w-[80px]'>
                 CSV
               </Button>
               <Button variant='outlined' onClick={() => handleExport('excel')} className='min-w-[80px]'>
                 Excel
               </Button>
-              <Button variant='outlined' onClick={() => handleExport('pdf')} className='min-w-[80px]'>
+              {/* <Button variant='outlined' onClick={() => handleExport('pdf')} className='min-w-[80px]'>
                 PDF
-              </Button>
-              <Button variant='outlined' onClick={() => handleExport('print')} className='min-w-[80px]'>
+              </Button> */}
+              {/* <Button variant='outlined' onClick={() => handleExport('print')} className='min-w-[80px]'>
                 Print
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
