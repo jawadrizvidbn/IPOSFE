@@ -44,3 +44,6 @@ next-env.d.ts
 
 .env
 .env.*
+
+ecosystem.config
+ecosystem.config.js

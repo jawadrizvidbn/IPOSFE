@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 165.73.85.11 -p 2025",
+    "dev:machine-1": "next dev -H 197.242.151.199 -p 2025",
     "dev:local": "next dev",
     "build": "next build",
     "start": "next start -H 165.73.85.11 -p 2025",
+    "start:machine-1": "next start -H 197.242.151.199 -p 2025",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
