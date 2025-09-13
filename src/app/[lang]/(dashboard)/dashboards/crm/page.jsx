@@ -1,7 +1,7 @@
 // MUI Imports
 'use client'
 import Grid from '@mui/material/Grid'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 // Components Imports
 import { signOut, useSession } from 'next-auth/react'
@@ -9,6 +9,8 @@ import { signOut, useSession } from 'next-auth/react'
 import CardStatWithImage from '@components/card-statistics/Character'
 import CardStatVertical from '@components/card-statistics/Vertical'
 import Transactions from '@views/dashboards/crm/Transactions'
+import TopTransactionsCard from '@views/dashboards/crm/TopTransactionsCard'
+import TopTurnoverCard from '@views/dashboards/crm/TopTurnoverCard'
 import TotalSales from '@views/dashboards/crm/TotalSales'
 import RevenueReport from '@views/dashboards/crm/RevenueReport'
 import CardWidgetsSalesOverview from '@views/dashboards/crm/SalesOverview'
@@ -18,19 +20,20 @@ import LineAreaChart from '@views/dashboards/crm/LineAreaChart'
 import UpgradePlan from '@views/dashboards/crm/UpgradePlan'
 import MeetingSchedule from '@views/dashboards/crm/MeetingSchedule'
 import DeveloperMeetup from '@views/dashboards/crm/DeveloperMeetup'
+import { useEffect } from 'react'
+import { getTopStores } from '@/redux/reducers/dashboardSlice'
 
 const DashboardCRM = () => {
   const { data: session } = useSession()
 
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(getTopStores({}))
+  }, [session?.user?.id])
   return (
     <Grid container spacing={6}>
-      <Grid item xs={12} sm={6} md={3} className='self-end'>
-        {/* {session?.user?.name || ''}<br />
-
-        {session?.user?.id || ''}<br />
-        {session?.user?.email || ''}<br /> */}
-
-
+      {/* <Grid item xs={12} sm={6} md={3} className='self-end'>
         <CardStatWithImage
           stats='13k'
           title='Ratings'
@@ -49,23 +52,26 @@ const DashboardCRM = () => {
           chipText='Last Week'
           src='/images/illustrations/characters/14.png'
         />
+      </Grid> */}
+      <Grid item xs={12} md={6} className='self-end'>
+        <TopTransactionsCard />
       </Grid>
       <Grid item xs={12} md={6} className='self-end'>
-        <Transactions />
+        <TopTurnoverCard />
       </Grid>
-      <Grid item xs={12} sm={6} md={3}>
+      {/* <Grid item xs={12} sm={6} md={3}>
         <TotalSales />
-      </Grid>
-      <Grid item xs={12} sm={6} md={3}>
+      </Grid> */}
+      <Grid item xs={12} sm={6} md={6}>
         <RevenueReport />
       </Grid>
       <Grid item xs={12} md={6}>
         <CardWidgetsSalesOverview />
       </Grid>
-      <Grid item xs={12} md={6}>
+      {/* <Grid item xs={12} md={6}>
         <ActivityTimeline />
-      </Grid>
-      <Grid item xs={12} md={6}>
+      </Grid> */}
+      {/* <Grid item xs={12} md={6}>
         <Grid container spacing={6}>
           <Grid item xs={12} sm={8}>
             <WeeklySales />
@@ -89,16 +95,16 @@ const DashboardCRM = () => {
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <Grid item xs={12} sm={6} lg={4}>
+      </Grid> */}
+      {/* <Grid item xs={12} sm={6} lg={4}>
         <UpgradePlan />
-      </Grid>
-      <Grid item xs={12} sm={6} lg={4}>
+      </Grid> */}
+      {/* <Grid item xs={12} sm={6} lg={4}>
         <MeetingSchedule />
-      </Grid>
-      <Grid item xs={12} sm={6} lg={4}>
+      </Grid> */}
+      {/* <Grid item xs={12} sm={6} lg={4}>
         <DeveloperMeetup />
-      </Grid>
+      </Grid> */}
     </Grid>
   )
 }

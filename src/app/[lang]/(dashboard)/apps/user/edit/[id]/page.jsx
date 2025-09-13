@@ -15,7 +15,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import CircularProgress from '@mui/material/CircularProgress'
-import { FormControl, InputLabel, Select } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, InputLabel, Select } from '@mui/material'
 
 // Third-party Imports
 import { toast } from 'react-toastify'
@@ -34,6 +34,7 @@ import { getAllPlans } from '@/redux/reducers/planSlice'
 import { getAllPermissions } from '@/redux/reducers/permissionSlice'
 import { updateUser, getUserById } from '@/redux/reducers/authSlice'
 import { ROLE_TYPES } from '@/utils/contants'
+import { getReportTypeLabel, REPORT_TYPE_VALUES, REPORT_TYPES } from '@/helpers/acrossReportConst'
 
 const schema = object({
   name: string([minLength(3, 'Name must be at least 3 characters long')]),
@@ -59,6 +60,7 @@ const EditUser = ({ params }) => {
   const [isServerPasswordShown, setIsServerPasswordShown] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedRole, setSelectedRole] = useState('')
+  const [reportPermissions, setReportPermissions] = useState({})
 
   // Redux
   const dispatch = useDispatch()
@@ -124,6 +126,7 @@ const EditUser = ({ params }) => {
           referenceNumber: userData.referenceNumber || '',
           role: userData.role || ''
         })
+        setReportPermissions(userData.reportPermissions)
         setSelectedRole(userData.role || '')
 
         // Connect to server automatically
@@ -180,7 +183,11 @@ const EditUser = ({ params }) => {
 
   const onSubmit = async data => {
     try {
-      const payload = { ...data, password: data?.password || null }
+      const payload = {
+        ...data,
+        password: data?.password || null,
+        reportPermissions: reportPermissions
+      }
       await dispatch(updateUser({ id: params.id, user: payload })).unwrap()
       toast.success('User updated successfully')
     } catch (error) {
@@ -605,6 +612,50 @@ const EditUser = ({ params }) => {
                       </FormControl>
                     )}
                   />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CardHeader title='Report Permissions' sx={{ px: 0, pt: 3, pb: 0 }} />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Card variant='outlined' sx={{ p: 2 }}>
+                    <CardHeader
+                      title={getReportTypeLabel(REPORT_TYPE_VALUES.retailWholesaleByCategory)}
+                      sx={{ px: 0, pt: 3, pb: 3 }}
+                    />
+                    <CardContent>
+                      <Controller
+                        name={`totalsOnly`}
+                        control={control}
+                        rules={{ required: false }}
+                        render={({ field }) => (
+                          <FormControl fullWidth>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={
+                                    reportPermissions[REPORT_TYPE_VALUES.retailWholesaleByCategory]?.totalsOnly || false
+                                  }
+                                  onChange={e => {
+                                    setReportPermissions({
+                                      ...reportPermissions,
+                                      [REPORT_TYPE_VALUES.retailWholesaleByCategory]: {
+                                        totalsOnly: e.target.checked
+                                      }
+                                    })
+                                  }}
+                                  name='totalsOnly'
+                                />
+                              }
+                              label='Show Totals Only'
+                              sx={{ mr: 3 }}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
                 </Grid>
 
                 <Grid item xs={12}>

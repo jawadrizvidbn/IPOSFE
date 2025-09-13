@@ -11,6 +11,8 @@ import stockOnHandReducer from './reducers/stockOnHandSlice'
 import planReducer from './reducers/planSlice'
 import permissionReducer from './reducers/permissionSlice'
 import databaseReducer from './reducers/databaseSlice'
+import dashboardReducer from './reducers/dashboardSlice'
+import acrossReportsReducer from './reducers/acrossReportsSlice'
 
 const persistConfig = {
   key: 'root',
@@ -26,7 +28,9 @@ const rootReducer = combineReducers({
   stockOnHand: stockOnHandReducer,
   plan: planReducer,
   permission: permissionReducer,
-  database: databaseReducer
+  database: databaseReducer,
+  dashboard: dashboardReducer,
+  acrossReports: acrossReportsReducer
 })
 
 const store = configureStore({

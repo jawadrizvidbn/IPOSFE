@@ -45,6 +45,8 @@ const Across_Report = () => {
   const id = new URLSearchParams(searchParams).get('id') // Extracting the id parameter value
   const startDateFromURL = searchParams.get('startDate') || '' // Default to empty if not found
   const endDateFromURL = searchParams.get('endDate') || '' // Default to empty if not found
+  const shopKeys = searchParams.get('shopKeys')
+
   const router = useRouter()
   const [clickedButtons, setClickedButtons] = useState({})
   const [filterStartDate, setFilterStartDate] = useState('')
@@ -79,6 +81,7 @@ const Across_Report = () => {
       // eslint-disable-next-line padding-line-between-statements
       if (filterStartDate) params.append('startDate', filterStartDate)
       if (filterEndDate) params.append('endDate', filterEndDate)
+      if (shopKeys) params.append('shopKeys', shopKeys)
       if (params.toString()) apiUrl += `?${params.toString()}`
 
       try {
@@ -105,7 +108,8 @@ const Across_Report = () => {
     }
 
     fetchData()
-  }, [session, filterStartDate, filterEndDate, router])
+  }, [session?.user?.token, filterStartDate, filterEndDate, router])
+
   useEffect(() => {
     const filtered = data?.filter(item => {
       const itemDate = new Date(item.DateTime)
@@ -197,15 +201,41 @@ const Across_Report = () => {
   }
 
   const exportCSV = () => {
-    const table = document.querySelector('#tableContainer table')
-    let csv = ''
+    console.log(filteredData, 'filteredData')
+    if (!filteredData || filteredData.length === 0) {
+      console.warn('No data to export')
+      return
+    }
 
-    for (let row of table.rows) {
-      const cells = Array.from(row.cells)
-        .map(cell => `"${cell.textContent.replace(/"/g, '""')}"`)
-        .join(',')
+    // Get column headers from the first data item
+    const headers = Object.keys(filteredData[0])
 
-      csv += cells + '\n'
+    // Create CSV header row
+    let csv = headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',') + '\n'
+
+    // Add data rows
+    filteredData.forEach(row => {
+      const values = headers.map(header => {
+        const value = row[header]
+        // Handle null/undefined values
+        const stringValue = value === null || value === undefined ? '' : String(value)
+        return `"${stringValue.replace(/"/g, '""')}"`
+      })
+      csv += values.join(',') + '\n'
+    })
+
+    // Add footer row with totals if grandTotal exists
+    if (grandTotal !== undefined && grandTotal !== null) {
+      const footerRow = headers.map(header => {
+        if (header.trim() === 'stockcode') {
+          return '"Total Qty"'
+        } else if (header.trim() === 'totalQty') {
+          return `"${grandTotal}"`
+        } else {
+          return '""'
+        }
+      })
+      csv += footerRow.join(',') + '\n'
     }
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -286,26 +316,6 @@ const Across_Report = () => {
 
       // Optionally show a user-friendly error message or notification
     }
-  }
-
-  const formatDate = date => {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' }
-
-    return date.toLocaleDateString(undefined, options)
-  }
-
-  const formatDateTime = DateTime => {
-    const date = new Date(DateTime)
-    const formattedDate = date.toLocaleDateString('en-GB') // Format as dd/mm/yyyy
-
-    const formattedTime = date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit', // Include seconds
-      hour12: true // Use 12-hour clock with AM/PM
-    })
-
-    return `${formattedDate} ${formattedTime}`
   }
 
   return (
@@ -428,7 +438,7 @@ const Across_Report = () => {
 
       <div id='tableContainer' className='sm:text-sm md:text-base lg:text-lg xl:text-xl' ref={containerRef}>
         <div className=''>
-          <table className='min-w-full bg-white border border-gray-200'>
+          <table className='min-w-full border border-gray-200'>
             <thead className='bg-gray-100'>
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>

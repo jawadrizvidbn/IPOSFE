@@ -124,3 +124,7 @@ code {
   background-color: rgb(var(--mui-palette-info-mainChannel) / 0.08);
   border: 0;
 }
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}

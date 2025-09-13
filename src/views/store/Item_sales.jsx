@@ -860,7 +860,9 @@ const ColumnVisibility = () => {
                             {columns.map(column =>
                               columnVisibility[column.id] ? (
                                 <td key={column.id} className='border border-gray-200 text-center'>
-                                  {stockCodeData[column.id] || '-'}
+                                  {['totalCostPrice', 'totalSelling'].includes(column.id)
+                                    ? formatDecimal(stockCodeData[column.id])
+                                    : stockCodeData[column.id] || '-'}
                                 </td>
                               ) : null
                             )}
