@@ -23,21 +23,23 @@ export const authOptions = {
        * username or password attributes manually in following credentials object.
        */
       credentials: {},
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         /*
          * You need to provide your own logic here that takes the credentials submitted and returns either
          * an object representing a user or value that is false/null if the credentials are invalid.
          * For e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
          * You can also use the `req` object to obtain additional parameters (i.e., the request IP address)
          */
-        const { email, password } = credentials
+        const { email, password, deviceId } = credentials
 
         try {
           // ** Login API Call to match the user credentials and receive user data in response along with his role
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'User-Agent': req.headers['user-agent'],
+              'X-Device-Id': deviceId
             },
             body: JSON.stringify({ email, password })
           })

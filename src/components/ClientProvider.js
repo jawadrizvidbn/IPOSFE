@@ -9,8 +9,13 @@ import store, { persistor } from '../redux/store'
 import { getSession } from 'next-auth/react'
 import { getUserById, setCurrentUser } from '@/redux/reducers/authSlice'
 import { setCurrentStore } from '@/redux/reducers/dashboardSlice'
+import { useEffect } from 'react'
+import { getOrCreateDeviceId } from '@/utils/deviceId'
 
 const ClientProvider = ({ children }) => {
+  useEffect(() => {
+    getOrCreateDeviceId()
+  }, [])
   const handleBeforeLift = async () => {
     const session = await getSession()
     const user = await store.dispatch(getUserById(session?.user?.id))

@@ -3,15 +3,18 @@ import userService from '../../services/userService'
 import { getSession, signIn } from 'next-auth/react'
 import { thunkStatus } from '@/utils/statusHandler'
 import { toast } from 'react-toastify'
+import { getOrCreateDeviceId } from '@/utils/deviceId'
 
 const name = 'auth'
 
 export const loginUser = createAsyncThunk(`${name}/loginUser`, async (data, { rejectWithValue }) => {
   try {
+    const deviceId = getOrCreateDeviceId() // already initialized in step 2
+
     const res = await signIn('credentials', {
       email: data.email,
       password: data.password,
-
+      deviceId: deviceId,
       redirect: false
     })
 
