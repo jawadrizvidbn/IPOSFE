@@ -439,7 +439,9 @@ const AllDataAccrossRecords = () => {
 
       {reportData.length > 0 && (
         <>
-          {[REPORT_TYPE_VALUES.invoice, REPORT_TYPE_VALUES.stockOnHand].includes(reportType) ? (
+          {[REPORT_TYPE_VALUES.invoice, REPORT_TYPE_VALUES.stockOnHand, REPORT_TYPE_VALUES.quantitySold].includes(
+            reportType
+          ) ? (
             <SortableVirtualTable
               grandTotal={grandTotal}
               reportData={dataSource}
