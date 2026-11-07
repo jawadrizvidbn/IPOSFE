@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { useDispatch, useSelector } from 'react-redux'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -11,7 +13,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 import { getAllShop } from '@/redux/reducers/databaseSlice'
 import { thunkStatus } from '@/utils/statusHandler'
 import { setReportType } from '@/redux/reducers/acrossReportsSlice'
-import { REPORT_TYPES } from '@/helpers/acrossReportConst'
+import { REPORT_TYPES, REPORT_TYPE_VALUES } from '@/helpers/acrossReportConst'
 
 const MultipleStores = () => {
   const loading = useSelector(state => state.database.getAllShopStatus === thunkStatus.LOADING)
@@ -65,10 +67,20 @@ const MultipleStores = () => {
     if (!session || selectedShops.length === 0 || !selectedReportType) return
 
     const baseNames = selectedShops.join(',')
+
     try {
-      router.push(getLocalizedUrl(`Across_dump_data?shopKeys=${baseNames}&reportType=${selectedReportType}`, 'en'))
+      const reportPath =
+        selectedReportType === REPORT_TYPE_VALUES.retailWholesaleTier ? 'RetailWholesaleTierReport' : 'Across_dump_data'
+
+      router.push(
+        getLocalizedUrl(
+          `${reportPath}?shopKeys=${encodeURIComponent(baseNames)}&reportType=${selectedReportType}`,
+          'en'
+        )
+      )
     } catch (error) {
       console.error('Error activating shops:', error)
+
       if (error.response && error.response.status === 401) {
         signOut({ redirect: false })
         router.push(getLocalizedUrl('/login', 'en'))

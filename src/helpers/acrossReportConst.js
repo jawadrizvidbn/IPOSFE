@@ -4,6 +4,7 @@ export const REPORT_TYPE_VALUES = {
   turnover: 'turnover',
   products: 'products',
   retailWholesale: 'retailWholesale',
+  retailWholesaleTier: 'retailWholesaleTier',
   stockOnHand: 'stockOnHand',
   dailySales: 'dailySales',
   invoice: 'invoice',
@@ -15,10 +16,12 @@ export const REPORT_TYPES = [
   { value: 'turnover', label: 'Turnover Report' },
   { value: 'products', label: 'Products Report' },
   { value: 'retailWholesale', label: 'Retail / Wholesale Report' },
+  { value: 'retailWholesaleTier', label: 'Retail / Wholesale Tier Report' },
   { value: 'stockOnHand', label: 'Stock On Hand Report' },
   { value: 'dailySales', label: 'Daily Sales Report' },
   { value: 'invoice', label: 'Invoice Report' },
   { value: 'retailWholesaleByCategory', label: 'Category Sales Report' }
+
   // { value: 'stock', label: 'Stock Report' },
   // { value: 'inventory', label: 'Inventory Report' },
   // { value: 'price', label: 'Price Change Report' },
@@ -31,16 +34,19 @@ export const getReportTypeLabel = type => {
     turnover: 'Turnover Report',
     products: 'Products Report',
     retailWholesale: 'Retail / Wholesale Report',
+    retailWholesaleTier: 'Retail / Wholesale Tier Report',
     quantitySold: 'Quantity Sold Report',
     stockOnHand: 'Stock On Hand Report',
     dailySales: 'Daily Sales Report',
     invoice: 'Invoice Report',
     retailWholesaleByCategory: 'Category Sales Report'
+
     // sales: 'Sales Report',
     // inventory: 'Inventory Report',
     // price: 'Price Change Report',
     // stock: 'Stock Movement Report'
   }
+
   return reportTypes[type] || type
 }
 
