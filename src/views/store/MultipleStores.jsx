@@ -69,6 +69,7 @@ const MultipleStores = () => {
     const baseNames = selectedShops.join(',')
 
     try {
+      // Route only the new tier report to its dedicated page; retain existing report routes.
       const reportPath =
         selectedReportType === REPORT_TYPE_VALUES.retailWholesaleTier ? 'RetailWholesaleTierReport' : 'Across_dump_data'
 

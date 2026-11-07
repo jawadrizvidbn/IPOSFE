@@ -14,7 +14,9 @@ import TierFilters from './TierFilters'
 import TierReportTable from './TierReportTable'
 import { getExportRows, TIERS } from './reportColumns'
 
+// Coordinate the dedicated report page without modifying existing Redux report state.
 export default function TierReport() {
+  // Keep selected stores, date inputs, generated results and request state separate.
   const search = useSearchParams()
   const shopKeys = search.get('shopKeys') || ''
   const [startDate, setStartDate] = useState('')
@@ -26,14 +28,17 @@ export default function TierReport() {
   const [error, setError] = useState('')
   const pending = useRef(null)
 
+  // Clear stale results and cancel pending requests when stores change or the page closes.
   useEffect(() => {
     setReport(null)
     setError('')
     setLoading(false)
 
+    // Render report controls, request feedback and the generated tier table.
     return () => pending.current?.abort()
   }, [shopKeys])
 
+  // Replace any previous request and generate the report for the submitted inputs.
   async function generateReport(event) {
     event.preventDefault()
     pending.current?.abort()
@@ -44,6 +49,7 @@ export default function TierReport() {
     setError('')
     setReport(null)
 
+    // Accept results only while this request is active and remember its actual period.
     try {
       const result = await getRetailWholesaleTierReport({ shopKeys, startDate, endDate }, controller.signal)
 
@@ -51,16 +57,20 @@ export default function TierReport() {
       setReport(result)
       setPeriod({ startDate, endDate })
     } catch (failure) {
+      // Ignore cancellation errors caused by navigation or a newer request.
       if (!controller.signal.aborted) setError(failure.message)
     } finally {
+      // Prevent an obsolete request from changing the current loading indicator.
       if (!controller.signal.aborted) setLoading(false)
     }
   }
 
+  // Export visible groups with filenames based on the generated report’s period.
   function exportReport(type) {
     const rows = getExportRows(report, visibleTiers)
     const filename = `Retail-Wholesale-Tiers-${period.startDate}-${period.endDate}`
 
+    // Reuse the existing CSV exporter for the flattened report rows.
     if (type === 'csv') {
       exportCSVFromData(rows, `${filename}.csv`)
       return
@@ -81,6 +91,7 @@ export default function TierReport() {
       <Typography align='center' className='mb-6'>
         Selected stores: {shopKeys.split(',').join(', ') || 'None'}
       </Typography>
+      {/* Collect dates and keep generation/export actions together. */}
       <form onSubmit={generateReport} className='flex flex-wrap justify-center items-end gap-4 mb-4'>
         <TextField
           label='Start Date'
@@ -109,21 +120,25 @@ export default function TierReport() {
           Excel
         </Button>
       </form>
+      {/* Display request failures separately from missing-data warnings. */}
       {error && (
         <Alert severity='error' className='mb-4'>
           {error}
         </Alert>
       )}
+      {/* Render the actual report period, warnings and available transaction results. */}
       {report && (
         <>
           <Typography variant='body2' className='mb-4'>
             Report period: {period.startDate} to {period.endDate}
           </Typography>
+          {/* Make incomplete branch/month coverage visible to the user. */}
           {report.warnings.map(warning => (
             <Alert severity='warning' key={warning} className='mb-2'>
               {warning}
             </Alert>
           ))}
+          {/* Show filters and results, or an explicit empty-state message. */}
           {report.data.length ? (
             <>
               <TierFilters value={visibleTiers} onChange={setVisibleTiers} />

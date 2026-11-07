@@ -4,14 +4,18 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Table
 
 import { getGroups } from './reportColumns'
 
+// Display quantities with fractional precision and values with two decimal places.
 const quantityFormat = new Intl.NumberFormat('en-ZA', { maximumFractionDigits: 4 })
 const valueFormat = new Intl.NumberFormat('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
+// Render branch/tier column groups while keeping product identifiers visible.
 export default function TierReportTable({ report, visibleTiers }) {
+  // Use null as the internal marker for the final All Stores column group.
   const [sort, setSort] = useState({ key: 'stockcode', direction: 'asc' })
   const groups = getGroups(visibleTiers)
   const branches = [...report.shops, null]
 
+  // Sort a copy of the product rows so the backend response remains unchanged.
   const rows = useMemo(
     () =>
       [...report.data].sort((a, b) => {
@@ -22,6 +26,7 @@ export default function TierReportTable({ report, visibleTiers }) {
     [report.data, sort]
   )
 
+  // Keep stock code and description fixed during horizontal scrolling.
   const sticky = (index, header = false) => ({
     position: 'sticky',
     left: index === 0 ? 0 : 150,
@@ -31,6 +36,7 @@ export default function TierReportTable({ report, visibleTiers }) {
     backgroundColor: header ? '#475569' : 'background.paper'
   })
 
+  // Reuse the same metric rendering for product rows and the grand-total row.
   const cells = (shops, totals) =>
     branches.flatMap(shop =>
       groups.flatMap(group => {
@@ -48,6 +54,7 @@ export default function TierReportTable({ report, visibleTiers }) {
       })
     )
 
+  // Constrain the table viewport while allowing comparison across many stores.
   return (
     <TableContainer
       sx={{ maxHeight: 600, border: '1px solid', borderColor: 'divider' }}
@@ -55,6 +62,7 @@ export default function TierReportTable({ report, visibleTiers }) {
       aria-label='Tier report, scroll horizontally to compare stores'
     >
       <Table size='small' sx={{ '& thead th': { bgcolor: '#475569', color: 'white', whiteSpace: 'nowrap' } }}>
+        {/* Build store, classification and quantity/value header levels. */}
         <TableHead sx={{ position: 'sticky', top: 0, zIndex: 3 }}>
           <TableRow>
             {['stockcode', 'stockdescription'].map((key, index) => (
@@ -98,6 +106,7 @@ export default function TierReportTable({ report, visibleTiers }) {
             )}
           </TableRow>
         </TableHead>
+        {/* Render all products followed by totals across the complete report. */}
         <TableBody>
           {rows.map((row, index) => (
             <TableRow
@@ -109,6 +118,7 @@ export default function TierReportTable({ report, visibleTiers }) {
               {cells(row.shops, row.totals)}
             </TableRow>
           ))}
+          {/* Keep grand totals independent of product sorting and hidden classifications. */}
           <TableRow sx={{ '& td': { fontWeight: 700, bgcolor: 'action.selected' } }}>
             <TableCell sx={sticky(0)}>Grand Total</TableCell>
             <TableCell sx={sticky(1)} />

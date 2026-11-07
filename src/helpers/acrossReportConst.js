@@ -4,6 +4,8 @@ export const REPORT_TYPE_VALUES = {
   turnover: 'turnover',
   products: 'products',
   retailWholesale: 'retailWholesale',
+
+  // Identify the new tier report independently of the original retail/wholesale report.
   retailWholesaleTier: 'retailWholesaleTier',
   stockOnHand: 'stockOnHand',
   dailySales: 'dailySales',
@@ -16,6 +18,8 @@ export const REPORT_TYPES = [
   { value: 'turnover', label: 'Turnover Report' },
   { value: 'products', label: 'Products Report' },
   { value: 'retailWholesale', label: 'Retail / Wholesale Report' },
+
+  // Place the new tier report directly below the original option.
   { value: 'retailWholesaleTier', label: 'Retail / Wholesale Tier Report' },
   { value: 'stockOnHand', label: 'Stock On Hand Report' },
   { value: 'dailySales', label: 'Daily Sales Report' },
@@ -34,6 +38,8 @@ export const getReportTypeLabel = type => {
     turnover: 'Turnover Report',
     products: 'Products Report',
     retailWholesale: 'Retail / Wholesale Report',
+
+    // Resolve the display label for the new report without changing existing labels.
     retailWholesaleTier: 'Retail / Wholesale Tier Report',
     quantitySold: 'Quantity Sold Report',
     stockOnHand: 'Stock On Hand Report',

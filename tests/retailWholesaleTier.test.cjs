@@ -13,6 +13,7 @@ vm.runInContext(source.replace(/export /g, '') + '\nthis.api = { getGroups, getE
 
 const { getGroups, getExportRows } = context.api
 
+// Verify exported columns preserve product identifiers, zeroes and complete totals.
 test('exports preserve zeroes, product codes, hidden tiers and complete branch totals', () => {
   const report = {
     shops: ['Beacon', 'Bellville'],
