@@ -26,12 +26,12 @@ export default function TierFilters({ value, onChange }) {
       </FormGroup>
       {/* Explain tier thresholds and the grouping rule alongside the controls. */}
       <Typography variant='body2'>
-        Retail: unmarked or marked group quantity below 10 · Tier 1: ≥10 and &lt;100 · Tier 2: ≥100 and &lt;1,000 · Tier
-        3: ≥1,000
+        ComboGroup: grouped quantity exactly 3, 6 or 9 · Category: 10–99, 100–999 or 1000+.
       </Typography>
       <Typography variant='caption'>
-        Groups use marked lines from the same sale, major category and subcategory within each store/month. Totals
-        always include all four classifications.
+        Combo and Category groups use the grouping shown above. Markers and stores/months stay separate. Unexpected records retain
+        their existing Retail or Wholesale classification and appear as validation warnings. Subtotals include their amounts and hidden columns;
+        add Retail Total and Wholesale Total to reconcile the overall Total.
       </Typography>
     </div>
   )

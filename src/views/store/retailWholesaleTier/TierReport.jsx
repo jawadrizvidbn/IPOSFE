@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useSearchParams } from 'next/navigation'
 
-import { Alert, Button, Card, CircularProgress, TextField, Typography } from '@mui/material'
+import { Alert, Button, Card, Checkbox, CircularProgress, FormControlLabel, TextField, Typography } from '@mui/material'
 import * as XLSX from 'xlsx'
 
 import { getRetailWholesaleTierReport } from '@/services/retailWholesaleTierService'
@@ -12,7 +12,7 @@ import { exportCSVFromData } from '@/helpers/exportHelpers'
 
 import TierFilters from './TierFilters'
 import TierReportTable from './TierReportTable'
-import { getExportRows, TIERS } from './reportColumns'
+import { getExportRows, hasValidationAmounts, TIERS } from './reportColumns'
 
 // Coordinate the dedicated report page without modifying existing Redux report state.
 export default function TierReport() {
@@ -21,6 +21,7 @@ export default function TierReport() {
   const shopKeys = search.get('shopKeys') || ''
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [includeSub2, setIncludeSub2] = useState(false)
   const [visibleTiers, setVisibleTiers] = useState(TIERS.map(tier => tier.key))
   const [report, setReport] = useState(null)
   const [period, setPeriod] = useState(null)
@@ -51,7 +52,7 @@ export default function TierReport() {
 
     // Accept results only while this request is active and remember its actual period.
     try {
-      const result = await getRetailWholesaleTierReport({ shopKeys, startDate, endDate }, controller.signal)
+      const result = await getRetailWholesaleTierReport({ shopKeys, startDate, endDate, includeSub2 }, controller.signal)
 
       if (controller.signal.aborted) return
       setReport(result)
@@ -68,7 +69,7 @@ export default function TierReport() {
   // Export visible groups with filenames based on the generated report’s period.
   function exportReport(type) {
     const rows = getExportRows(report, visibleTiers)
-    const filename = `Retail-Wholesale-Tiers-${period.startDate}-${period.endDate}`
+    const filename = `Retail-Wholesale-Tiers-${period.startDate}-${period.endDate}-${report.includeSub2 ? 'With-Sub2' : 'Without-Sub2'}`
 
     // Reuse the existing CSV exporter for the flattened report rows.
     if (type === 'csv') {
@@ -110,6 +111,17 @@ export default function TierReport() {
           inputProps={{ min: startDate }}
           onChange={event => setEndDate(event.target.value)}
         />
+        {/* Regenerate to apply this grouping choice; existing results retain their submitted rule. */}
+        <FormControlLabel
+          label='Include Sub2 in grouping'
+          control={
+            <Checkbox
+              checked={includeSub2}
+              disabled={loading}
+              onChange={event => setIncludeSub2(event.target.checked)}
+            />
+          }
+        />
         <Button type='submit' variant='contained' disabled={loading || !shopKeys}>
           {loading ? <CircularProgress size={24} color='inherit' /> : 'Generate Report'}
         </Button>
@@ -130,14 +142,28 @@ export default function TierReport() {
       {report && (
         <>
           <Typography variant='body2' className='mb-4'>
-            Report period: {period.startDate} to {period.endDate}
+            Report period: {period.startDate} to {period.endDate} · Grouping: Sale + Major + Sub1
+            {report.includeSub2 ? ' + Sub2' : ' (Sub2 excluded)'}
           </Typography>
+          {/* An edited control must not relabel or silently change the already generated results. */}
+          {report.includeSub2 !== includeSub2 && (
+            <Alert severity='info' className='mb-2'>Grouping selection changed. Generate Report to apply it.</Alert>
+          )}
           {/* Make incomplete branch/month coverage visible to the user. */}
           {report.warnings.map(warning => (
             <Alert severity='warning' key={warning} className='mb-2'>
               {warning}
             </Alert>
           ))}
+          {/* Unexpected source data is validation, not an extra standard sales tier; retain all its amounts. */}
+          {hasValidationAmounts(report) && (
+            <Alert severity='warning' className='mb-2'>
+              Unexpected records are included in totals and require review. Validation Retail: Qty{' '}
+              {report.totals.unmatchedRetailQty ?? 0}, Value {report.totals.unmatchedRetailValue ?? 0}. Validation Wholesale: Qty{' '}
+              {report.totals.unmatchedWholesaleQty ?? 0}, Value {report.totals.unmatchedWholesaleValue ?? 0}.
+              CSV/Excel includes the validation amounts separately.
+            </Alert>
+          )}
           {/* Show filters and results, or an explicit empty-state message. */}
           {report.data.length ? (
             <>

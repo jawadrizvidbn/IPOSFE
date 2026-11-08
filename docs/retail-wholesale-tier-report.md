@@ -1,64 +1,66 @@
-# Retail / Wholesale Tier Report frontend
+# Retail / Wholesale category and combo report UI
 
-## Navigation and isolation
+## Scope and release status
 
-Across Store's report selector adds `Retail / Wholesale Tier Report` immediately
-after the existing Retail / Wholesale option. Only this new option navigates to
-`/[lang]/RetailWholesaleTierReport?shopKeys=...`. Existing report options still
-use `Across_dump_data`. The old report page, Redux slice, table helpers, and
-backend calculation are unchanged.
+The dedicated RetailWholesaleTierReport route and selector entry remain separate
+from the original Retail/Wholesale report. Existing reports and Redux state are
+unchanged. This revision requires the matching backend revision; do not deploy
+until the actual reference Combo 3 sale's Sub2 grouping has been validated.
 
-## New modules
+## Display and exports
 
-- `src/app/[lang]/(dashboard)/RetailWholesaleTierReport/page.jsx`: dedicated route.
-- `src/services/retailWholesaleTierService.js`: API wrapper using the existing
-  Axios instance and NextAuth Bearer-token handling.
-- `src/views/store/retailWholesaleTier/TierReport.jsx`: dates, request lifecycle,
-  loading/errors/warnings, report state, exports, and page composition.
-- `TierFilters.jsx`: four independently selectable classification columns.
-- `TierReportTable.jsx`: grouped store/classification/Qty–Value headers,
-  horizontally scrollable table, sticky product columns, code/description sorting,
-  and grand totals. All Stores follows the selected branch groups.
-- `reportColumns.js`: shared group definitions and export flattening.
+Each stockcode/product row has each selected store and an All Stores column group.
+Every classification and total has a Qty/Value pair. The ordered groups are:
 
-Only `acrossReportConst.js` and `MultipleStores.jsx` integrate the new report with
-existing selection/navigation. No additional Redux state is needed because the
-new page owns its report lifecycle.
+1. Pure Retail, Combo 3, Combo 6, Combo 9, Retail Total.
+2. Category 10–99, Category 100–999, Category 1000+, Wholesale Total.
+3. Total.
 
-## Display and export semantics
+Unexpected source records preserve existing Retail/Wholesale classification in
+internal validation counters. Their amounts are not lost or counted again as pure
+retail. They appear in validation warnings, not normal business tier columns. Wholesale Total includes separately disclosed validation Wholesale amounts; when that is zero it equals just the category tiers.
+Retail Total includes its five leaf components. Overall Total equals Retail Total
+plus Wholesale Total, never a sum of all displayed columns (which include subtotals).
 
-Both dates are required. The end date is inclusive. Generation clears previous
-results; changing date inputs alone does not change the already-generated
-report. Its actual period remains visible and is used in exported filenames.
-Pending requests are cancelled on unmount/store changes and stale responses
-are ignored. Missing database/month warnings are shown above any available data.
+Filters toggle leaf column visibility only. Retail Total, Wholesale Total and
+Total remain visible and include all data, even hidden leaf columns. Table and
+CSV/Excel share `reportColumns.js` so labels, order and totals match. If unexpected
+records exist, exports add Validation Retail/Wholesale Qty/Value columns separately. Exports
+include selected visible leaf groups, all subtotals, all products and Grand Total.
+Stock-code strings and numeric zeroes are preserved.
 
-The backend classifies by marked sale/category group quantity; the frontend
-never recalculates tiers. A marked line has both CehqueNum and Cardnum populated.
-Quantities come from qty and values from linetotal, with signed refunds preserved.
-See `IPOSBE/docs/retail-wholesale-tier-report.md` for the full calculation.
+## Business logic
 
-Tier checkboxes hide/show columns only. Total columns always include every tier,
-including hidden ones. Hiding all tiers leaves totals visible. Quantities display
-up to four decimal places; values display two. Raw numeric results are preserved
-in exports. CSV/Excel include every product, selected visible classifications,
-per-store totals, All Stores totals, and a final Grand Total row. Numeric zeroes
-and stock codes with leading zeroes are preserved in Excel cell types.
+The **Include Sub2 in grouping** checkbox applies to both ComboGroup and Category.
+Unchecked (default) uses Sale + Major + Sub1. Checked adds Sub2. Dates and this
+choice are sent together when generating the report. Changing the checkbox does
+not relabel old results: an information message asks the user to regenerate.
+The result header, CSV/Excel Grouping column and export filename record the
+backend's returned includeSub2 value.
 
-The mockup is a layout reference. The implemented table also includes an explicit
-All Stores group. No existing summary/detailed toggle is reused: this new report
-always uses actual quantities and line values.
+Exact ComboGroup groups qualify at quantities 3, 6 and 9.
+Exact Category groups qualify at thresholds 10, 100 and 1000. Cardnum is not a
+quantity source or an eligibility requirement. Each original product line keeps
+its own quantity and linetotal allocation, once only. Totals are calculated on the
+backend; this frontend never infers tiers from product totals.
 
-## Verification
+The backend's documented fallback, null handling and release gate are in
+`docs/retail-wholesale-tier-report.md` and `docs/category-combo-validation.md` in
+IPOSBE. The clearer screenshot identifies the reference sales and differing Sub2 values.
+Regression fixtures transcribe those quantities/keys, but use synthetic money because
+linetotal is not visible. Live SQL and monetary reconciliation remain pending.
 
-Run `node --test tests/retailWholesaleTier.test.cjs` from IPOSFE to check export
-column visibility, zeroes, stock codes and totals.
+## Existing integration and lifecycle
 
-Lint the new modules and integration files with `next lint`. Build using the
-repository's normal `npm run build`. The backend fixtures exercise thresholds,
-null groups, marker conditions, dates, refunds, reconciliation, and branch totals.
+`MultipleStores.jsx` routes the new selection to this dedicated page; other
+selections still use Across_dump_data. `retailWholesaleTierService.js` reuses
+existing Axios authentication. Date inputs, cancellation, request/error states,
+missing-data warnings, sorting, fixed product columns and export filenames retain
+their existing implementation. No environment or connection settings changed.
 
-Before release, verify at desktop and narrow viewport sizes: scroll/sticky
-columns, sorting, hiding tiers, exporting multiple branches, warnings, empty
-results, and errors. Smoke-test the old Retail / Wholesale report and another
-Across Store report. Live MySQL data verification remains a deployment check.
+## Tests
+
+Run `node --test tests/retailWholesaleTier.test.cjs tests/deviceId.test.cjs`.
+Export tests cover zeroes, leading-zero stock codes, hidden leaf groups, combos,
+category tiers, unmatched columns, both subtotals and the final grand-total row.
+Device-ID tests remain regression checks for HTTP deployments.
